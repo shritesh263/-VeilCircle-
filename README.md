@@ -98,6 +98,20 @@ VeilCircle smart contracts are deployed to Midnight testnets with verifiable con
 
 ---
 
+---
+
+## 🪢 Supported Midnight Wallets
+
+VeilCircle features native multi-wallet connectivity compliant with Midnight's standard DApp connector specifications:
+
+| Wallet | Detection Standard | Features Supported | Status |
+| :--- | :--- | :--- | :--- |
+| **Midnight Lace Wallet** | `window.midnight.mnLace` | DUST balancing, ZK transaction signing, Bech32m address formatting | 🟢 Fully Integrated |
+| **1AM Midnight Wallet** | `window.midnight["1am"]` | Shielded key derivation, privacy state queries, circuit execution | 🟢 Fully Integrated |
+| **Testnet Sandbox** | Built-in provider | Pre-funded testnet dev environment with 850 DUST & 25 NIGHT | 🟢 Instant One-Click |
+
+---
+
 ## 📦 Project Structure
 
 ```

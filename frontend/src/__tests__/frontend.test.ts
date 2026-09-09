@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { computeCommitment, computeNullifier, generateProofForCircle, generateRandomHex } from "../services/crypto";
 import { DEFAULT_CIRCLES } from "../services/mockData";
+import { midnightService } from "../services/midnight";
 
 describe("Frontend Crypto & Midnight Integration", () => {
   it("1. Generates deterministic commitments from private witness values", async () => {
@@ -39,5 +40,26 @@ describe("Frontend Crypto & Midnight Integration", () => {
     expect(result.proof.publicInputs.circleId).toBe(circleId);
     expect(result.proof.publicInputs.nullifier).toBe(result.nullifier);
     expect(result.proof.witnessBlinded).toBe(true);
+  });
+
+  it("4. Detects available Midnight wallets (Lace, 1AM, Sandbox)", () => {
+    const wallets = midnightService.getAvailableWallets();
+    expect(wallets.length).toBe(3);
+    expect(wallets.find((w) => w.id === "lace")).toBeDefined();
+    expect(wallets.find((w) => w.id === "1am")).toBeDefined();
+    expect(wallets.find((w) => w.id === "sandbox")).toBeDefined();
+  });
+
+  it("5. Connects to Midnight sandbox with funded DUST balance and disconnects cleanly", async () => {
+    const state = await midnightService.connectWallet("sandbox");
+    expect(state.isConnected).toBe(true);
+    expect(state.provider).toBe("sandbox");
+    expect(state.balanceDUST).toBeGreaterThan(0);
+    expect(state.address).toBeDefined();
+
+    midnightService.disconnectWallet();
+    const disconnectedState = midnightService.getWalletState();
+    expect(disconnectedState.isConnected).toBe(false);
+    expect(disconnectedState.address).toBeNull();
   });
 });

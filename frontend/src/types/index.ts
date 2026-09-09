@@ -66,11 +66,25 @@ export interface NetworkConfig {
   explorerUrl: string;
 }
 
+export type WalletProviderType = "lace" | "1am" | "sandbox";
+
+export interface WalletProviderInfo {
+  id: WalletProviderType;
+  name: string;
+  description: string;
+  icon: string;
+  websiteUrl: string;
+  isInstalled: boolean;
+}
+
 export interface LaceWalletState {
   isConnected: boolean;
+  provider: WalletProviderType;
+  providerName: string;
   address: string | null;
   network: "preview" | "preprod";
   balanceDUST: number;
   balanceNIGHT: number;
-  mode: "lace_extension" | "sandbox";
+  isConnecting: boolean;
+  error: string | null;
 }
