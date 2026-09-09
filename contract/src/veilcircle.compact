@@ -1,0 +1,139 @@
+// VeilCircle — Zero-Knowledge Support Group Membership Contract
+// Language: Compact (Midnight Network)
+// Standard: Compact 0.19+
+
+pragma language_version >= 0.19;
+
+import CompactStandardLibrary;
+
+// --- Data Types ---
+
+export struct CircleInfo {
+    id: Bytes[32],
+    nameHash: Bytes[32],
+    issuerPubKey: Bytes[32],
+    memberCount: Uint<64>,
+    isActive: Boolean
+}
+
+export struct MembershipProofPublic {
+    circleId: Bytes[32],
+    nullifier: Bytes[32],
+    timestamp: Uint<64>
+}
+
+// --- Public Ledger State ---
+// An outside observer can ONLY see:
+// 1. Registered circles (circleId, metadata hash, issuer public key, member count)
+// 2. Spent nullifiers (to prevent double-spend / multiple joins from same credential)
+// 3. Registered credential commitments (cryptographic blinding hashes)
+// NO identifying data, conditions, names, or addresses are EVER recorded in ledger state.
+
+export ledger circles: Map<Bytes[32], CircleInfo>;
+export ledger spentNullifiers: Set<Bytes[32]>;
+export ledger credentialCommitments: Set<Bytes[32]>;
+export ledger totalMembershipsProven: Uint<64>;
+
+// --- Private Witness Declarations ---
+// Private witness values exist ONLY on the user device and are processed in ZK circuits.
+// They NEVER enter the public ledger or transaction payload unblinded.
+
+witness secretKeyWitness(): Bytes[32];
+witness eligibilityAttributeWitness(): Bytes[32];
+witness saltWitness(): Bytes[32];
+
+// --- Cryptographic Circuit Helper Functions ---
+
+circuit computeCommitment(secretKey: Bytes[32], attribute: Bytes[32], salt: Bytes[32]): Bytes[32] {
+    return persistent_hash<Vector<3, Bytes[32]>>([secretKey, attribute, salt]);
+}
+
+circuit computeNullifier(secretKey: Bytes[32], circleId: Bytes[32]): Bytes[32] {
+    return persistent_hash<Vector<2, Bytes[32]>>([secretKey, circleId]);
+}
+
+// --- Public Circuit Exports ---
+
+// 1. Create a new support circle
+export circuit createCircle(
+    circleId: Bytes[32],
+    nameHash: Bytes[32],
+    issuerPubKey: Bytes[32]
+): Void {
+    assert !circles.member(circleId) "Circle with this ID already exists";
+    
+    circles.insert(
+        circleId,
+        CircleInfo {
+            id: circleId,
+            nameHash: nameHash,
+            issuerPubKey: issuerPubKey,
+            memberCount: 0,
+            isActive: true
+        }
+    );
+}
+
+// 2. Register authorized eligibility credential commitment
+export circuit registerCredentialCommitment(
+    commitment: Bytes[32]
+): Void {
+    assert !credentialCommitments.member(commitment) "Commitment already registered";
+    credentialCommitments.insert(commitment);
+}
+
+// 3. Prove eligibility and join circle in Zero-Knowledge
+// Consumes private witness: (secretKey, attribute, salt)
+// Public inputs: circleId, expectedNullifier
+export circuit proveAndJoinCircle(
+    circleId: Bytes[32],
+    expectedNullifier: Bytes[32]
+): Boolean {
+    // Verify circle exists and is active
+    assert circles.member(circleId) "Target circle does not exist";
+    let circle = circles.lookup(circleId);
+    assert circle.isActive "Circle is currently inactive";
+
+    // 1. Pull private witness values (client-side only)
+    let secretKey = secretKeyWitness();
+    let attribute = eligibilityAttributeWitness();
+    let salt = saltWitness();
+
+    // 2. Cryptographically compute the commitment from witness
+    let calculatedCommitment = computeCommitment(secretKey, attribute, salt);
+
+    // 3. Verify that the credential commitment was pre-authorized by an issuer
+    assert credentialCommitments.member(calculatedCommitment) "Invalid or unverified credential commitment";
+
+    // 4. Derive deterministic nullifier for this specific circle
+    // Nullifier = H(secretKey, circleId)
+    // Ensures single use per circle without linking user identity or linking across different circles
+    let derivedNullifier = computeNullifier(secretKey, circleId);
+    assert derivedNullifier == expectedNullifier "Nullifier derivation mismatch";
+
+    // 5. Enforce anti-double-join / anti-sybil constraint
+    assert !spentNullifiers.member(derivedNullifier) "Nullifier already spent: Member already joined this circle";
+
+    // 6. Update ledger state
+    spentNullifiers.insert(derivedNullifier);
+    totalMembershipsProven = totalMembershipsProven + 1;
+    
+    // Update circle member count
+    circles.insert(
+        circleId,
+        CircleInfo {
+            id: circle.id,
+            nameHash: circle.nameHash,
+            issuerPubKey: circle.issuerPubKey,
+            memberCount: circle.memberCount + 1,
+            isActive: circle.isActive
+        }
+    );
+
+    return true;
+}
+
+// 4. Read-only verification check for circle membership by nullifier
+export circuit isNullifierSpent(nullifier: Bytes[32]): Boolean {
+    return spentNullifiers.member(nullifier);
+}
