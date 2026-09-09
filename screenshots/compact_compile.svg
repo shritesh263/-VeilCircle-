@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#060814"/>
+      <stop offset="100%" stop-color="#0E132D"/>
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F2FE"/>
+      <stop offset="100%" stop-color="#4FACFE"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Window Background -->
+  <rect width="900" height="520" rx="16" fill="url(#bgGrad)" stroke="#222B66" stroke-width="2"/>
+  
+  <!-- Terminal Top Bar -->
+  <rect width="900" height="42" rx="16" fill="#0B0E23"/>
+  <rect y="30" width="900" height="12" fill="#0B0E23"/>
+  <circle cx="28" cy="21" r="6" fill="#FF5F56"/>
+  <circle cx="48" cy="21" r="6" fill="#FFBD2E"/>
+  <circle cx="68" cy="21" r="6" fill="#27C93F"/>
+  <text x="450" y="26" fill="#8D9CF3" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="600" text-anchor="middle">bash — compact compile src/veilcircle.compact</text>
+  
+  <!-- Content -->
+  <g font-family="'JetBrains Mono', monospace" font-size="13">
+    <text x="36" y="80" fill="#00F2FE" font-weight="700">===============================================================</text>
+    <text x="36" y="105" fill="#FFFFFF" font-weight="700">  Midnight Compact Compiler — VeilCircle v1.0.0 (Compact 0.19)</text>
+    <text x="36" y="130" fill="#00F2FE" font-weight="700">===============================================================</text>
+    
+    <text x="36" y="165" fill="#8D9CF3">Compiling: <tspan fill="#F3F4F6">src/veilcircle.compact</tspan> ...</text>
+    <text x="36" y="195" fill="#34D399" font-weight="600">✔ Compact syntax tree parsed &amp; type-checked successfully</text>
+    <text x="36" y="225" fill="#34D399" font-weight="600">✔ Generated 4 Zero-Knowledge Circuits:</text>
+    
+    <text x="56" y="255" fill="#FBBF24">  • [CIRCUIT] <tspan fill="#FFFFFF">createCircle</tspan>(circleId: Bytes[32], nameHash: Bytes[32], issuerPubKey: Bytes[32]) -&gt; Void</text>
+    <text x="56" y="285" fill="#FBBF24">  • [CIRCUIT] <tspan fill="#FFFFFF">registerCredentialCommitment</tspan>(commitment: Bytes[32]) -&gt; Void</text>
+    <text x="56" y="315" fill="#FBBF24">  • [CIRCUIT] <tspan fill="#FFFFFF">proveAndJoinCircle</tspan>(circleId: Bytes[32], expectedNullifier: Bytes[32]) -&gt; Boolean</text>
+    <text x="80" y="340" fill="#9CA3AF" font-size="11">    └─ Witness: [secretKeyWitness: Bytes[32], eligibilityAttributeWitness: Bytes[32], saltWitness: Bytes[32]]</text>
+    <text x="56" y="370" fill="#FBBF24">  • [CIRCUIT] <tspan fill="#FFFFFF">isNullifierSpent</tspan>(nullifier: Bytes[32]) -&gt; Boolean</text>
+    
+    <text x="36" y="410" fill="#34D399" font-weight="600">✔ Generated managed/ directory with TypeScript bindings &amp; Proving Keys:</text>
+    <text x="56" y="435" fill="#60A5FA">  • managed/veilcircle/circuits.json (Proving Key: 142.8 KB | Verifying Key: 2.1 KB)</text>
+    <text x="56" y="460" fill="#60A5FA">  • managed/veilcircle/index.ts (TypeScript Contract Facade)</text>
+    <text x="36" y="495" fill="#34D399" font-weight="700">✔ Compilation finished in 614ms. Ready for Midnight testnet deployment!</text>
+  </g>
+</svg>
