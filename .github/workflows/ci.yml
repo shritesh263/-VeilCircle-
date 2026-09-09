@@ -1,0 +1,67 @@
+name: VeilCircle CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  contract-tests:
+    name: Compact Contract & ZK Circuit Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: contract/package.json
+
+      - name: Install Contract Dependencies
+        working-directory: ./contract
+        run: npm ci || npm install
+
+      - name: Compile Compact Smart Contract & Circuits
+        working-directory: ./contract
+        run: npm run compact:compile
+
+      - name: Run Contract Vitest Suite
+        working-directory: ./contract
+        run: npm test
+
+      - name: Verify Preprod & Preview Deployment Artifacts
+        working-directory: ./contract
+        run: |
+          npm run deploy:preview
+          npm run deploy:preprod
+
+  frontend-build-and-test:
+    name: Frontend Build, ZK Proof & Lace Integration Tests
+    runs-on: ubuntu-latest
+    needs: contract-tests
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: frontend/package.json
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci || npm install
+
+      - name: Run Frontend ZK Proof Unit Tests
+        working-directory: ./frontend
+        run: npm test
+
+      - name: TypeCheck & Build Production Vite Bundle
+        working-directory: ./frontend
+        run: npm run build
