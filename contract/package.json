@@ -1,0 +1,24 @@
+{
+  "name": "@veilcircle/contract",
+  "version": "1.0.0",
+  "description": "VeilCircle Compact smart contract and zero-knowledge circuits on Midnight blockchain",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "compact:compile": "node scripts/compile.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "deploy:preview": "ts-node scripts/deploy.ts --network preview",
+    "deploy:preprod": "ts-node scripts/deploy.ts --network preprod"
+  },
+  "keywords": ["midnight", "compact", "zero-knowledge", "privacy", "zk-snark", "veilcircle"],
+  "author": "VeilCircle Team",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}
