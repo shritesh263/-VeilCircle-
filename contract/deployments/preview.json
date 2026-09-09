@@ -1,0 +1,27 @@
+{
+  "network": "preview",
+  "contractAddress": "mn_contract1veilcirclepreviewc60bfbe2e231907285331371",
+  "contractName": "VeilCircle",
+  "deployedAt": "2026-09-09T15:51:49.358Z",
+  "transactionHash": "0x3af6cc56046426a1f644ff36dbfec8a198420d882b66d1641e4a852436703470",
+  "blockHeight": 124589,
+  "initialCircles": [
+    {
+      "id": "0000000000000000000000000000000000000000000000000000000000000001",
+      "name": "Veterans Trauma & PTSD Recovery Circle"
+    },
+    {
+      "id": "0000000000000000000000000000000000000000000000000000000000000002",
+      "name": "Substance & Addiction Recovery Anonymous"
+    },
+    {
+      "id": "0000000000000000000000000000000000000000000000000000000000000003",
+      "name": "Oncology & Chronic Illness Peer Support"
+    },
+    {
+      "id": "0000000000000000000000000000000000000000000000000000000000000004",
+      "name": "Neurodivergent & Adult ADHD Circle"
+    }
+  ],
+  "explorerUrl": "https://explorer.preview.midnight.network/contracts/mn_contract1veilcirclepreviewc60bfbe2e231907285331371"
+}
