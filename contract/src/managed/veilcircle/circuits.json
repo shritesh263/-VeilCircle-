@@ -1,0 +1,59 @@
+{
+  "contractName": "VeilCircle",
+  "language": "Compact",
+  "languageVersion": "0.19.0",
+  "compiledAt": "2026-09-09T15:51:30.841Z",
+  "circuits": [
+    {
+      "name": "createCircle",
+      "isExported": true,
+      "parameters": [
+        "circleId: Bytes[32]",
+        "nameHash: Bytes[32]",
+        "issuerPubKey: Bytes[32]"
+      ],
+      "returnType": "Void",
+      "witnesses": []
+    },
+    {
+      "name": "registerCredentialCommitment",
+      "isExported": true,
+      "parameters": [
+        "commitment: Bytes[32]"
+      ],
+      "returnType": "Void",
+      "witnesses": []
+    },
+    {
+      "name": "proveAndJoinCircle",
+      "isExported": true,
+      "parameters": [
+        "circleId: Bytes[32]",
+        "expectedNullifier: Bytes[32]"
+      ],
+      "returnType": "Boolean",
+      "witnesses": [
+        "secretKeyWitness",
+        "eligibilityAttributeWitness",
+        "saltWitness"
+      ]
+    },
+    {
+      "name": "isNullifierSpent",
+      "isExported": true,
+      "parameters": [
+        "nullifier: Bytes[32]"
+      ],
+      "returnType": "Boolean",
+      "witnesses": []
+    }
+  ],
+  "ledgerState": {
+    "circles": "Map<Bytes[32], CircleInfo>",
+    "spentNullifiers": "Set<Bytes[32]>",
+    "credentialCommitments": "Set<Bytes[32]>",
+    "totalMembershipsProven": "Uint<64>"
+  },
+  "provingKeySize": "142.8 KB",
+  "verifyingKeySize": "2.1 KB"
+}
