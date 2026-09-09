@@ -20,6 +20,52 @@ export const NETWORKS: Record<string, NetworkConfig> = {
   }
 };
 
+/**
+ * Safely inspects the browser window for a specific wallet extension
+ */
+function findConnector(provider: "lace" | "1am"): any | null {
+  if (typeof window === "undefined") return null;
+  const win = window as any;
+
+  if (provider === "lace") {
+    const candidates = [
+      win.midnight?.mnLace,
+      win.midnight?.lace,
+      win.cardano?.lace,
+      win.cardano?.mnLace,
+      win.lace
+    ];
+
+    for (const c of candidates) {
+      if (c && (typeof c.enable === "function" || typeof c.state === "function" || typeof c.getAddress === "function" || typeof c.getChangeAddress === "function")) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  if (provider === "1am") {
+    const candidates = [
+      win.midnight?.["1am"],
+      win.midnight?.oneam,
+      win.midnight?.["1AM"],
+      win.cardano?.["1am"],
+      win.cardano?.oneam,
+      win.oneam,
+      win["1am"]
+    ];
+
+    for (const c of candidates) {
+      if (c && (typeof c.enable === "function" || typeof c.state === "function" || typeof c.getAddress === "function" || typeof c.getChangeAddress === "function")) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  return null;
+}
+
 class MidnightService {
   private walletState: LaceWalletState = {
     isConnected: false,
@@ -36,7 +82,6 @@ class MidnightService {
   private listeners: ((state: LaceWalletState) => void)[] = [];
 
   constructor() {
-    // Attempt auto-reconnect if previously connected
     if (typeof window !== "undefined") {
       const savedProvider = localStorage.getItem("veilcircle_connected_wallet") as WalletProviderType | null;
       if (savedProvider) {
@@ -69,23 +114,8 @@ class MidnightService {
    * Check which wallets are currently installed in the browser window
    */
   public getAvailableWallets(): WalletProviderInfo[] {
-    const isBrowser = typeof window !== "undefined";
-    const win = isBrowser ? (window as any) : {};
-
-    // Lace detection
-    const hasLace = Boolean(
-      win.midnight?.mnLace ||
-      win.midnight?.lace ||
-      win.cardano?.lace
-    );
-
-    // 1AM Wallet detection
-    const has1AM = Boolean(
-      win.midnight?.["1am"] ||
-      win.midnight?.oneam ||
-      win.oneam ||
-      win.cardano?.["1am"]
-    );
+    const laceConnector = findConnector("lace");
+    const oneAmConnector = findConnector("1am");
 
     return [
       {
@@ -94,7 +124,7 @@ class MidnightService {
         description: "Official privacy wallet for Midnight token balancing & zero-knowledge contracts.",
         icon: "🪢",
         websiteUrl: "https://www.lace.io",
-        isInstalled: hasLace
+        isInstalled: Boolean(laceConnector)
       },
       {
         id: "1am",
@@ -102,7 +132,7 @@ class MidnightService {
         description: "Privacy-first Midnight & Cardano ecosystem wallet with native shielded token support.",
         icon: "⚡",
         websiteUrl: "https://1am.xyz",
-        isInstalled: has1AM
+        isInstalled: Boolean(oneAmConnector)
       },
       {
         id: "sandbox",
@@ -116,7 +146,7 @@ class MidnightService {
   }
 
   /**
-   * Connect to real Lace Wallet, 1AM Wallet, or Testnet Sandbox
+   * Robust connection handler for real Lace, 1AM, or Testnet Sandbox
    */
   public async connectWallet(provider: WalletProviderType): Promise<LaceWalletState> {
     this.walletState = {
@@ -127,70 +157,97 @@ class MidnightService {
     this.notify();
 
     try {
-      const win = typeof window !== "undefined" ? (window as any) : {};
+      if (provider === "lace" || provider === "1am") {
+        const connector = findConnector(provider);
 
-      if (provider === "lace") {
-        const laceConnector = win.midnight?.mnLace || win.midnight?.lace || win.cardano?.lace;
-
-        if (!laceConnector) {
-          throw new Error("Lace Wallet is not detected in your browser. Please install the Lace extension or try the Testnet Sandbox.");
+        if (!connector) {
+          const walletLabel = provider === "lace" ? "Midnight Lace Wallet" : "1AM Wallet";
+          throw new Error(
+            `${walletLabel} extension is not detected in your browser. You can install it, or use the "Testnet Developer Sandbox" for an instant demo.`
+          );
         }
 
-        const api = await laceConnector.enable();
-        const state = api.state ? await api.state() : {};
-        const address = state.address || state.changeAddress || (api.getChangeAddress ? await api.getChangeAddress() : null) || "mn_addr1qg928xka9201msdf829103984029182390182";
+        // Safely invoke enable() if available or use connector directly if already active API
+        let api: any = connector;
+        if (typeof connector.enable === "function") {
+          try {
+            api = await connector.enable();
+          } catch (enableErr: any) {
+            console.warn(`Error enabling ${provider} wallet:`, enableErr);
+            throw new Error(enableErr?.message || `Connection request rejected in ${provider === "lace" ? "Lace" : "1AM"} extension.`);
+          }
+        } else if (typeof connector === "function") {
+          try {
+            api = await connector();
+          } catch (fnErr: any) {
+            console.warn(`Error calling ${provider} connector function:`, fnErr);
+            throw new Error(fnErr?.message || `Failed to initialize ${provider === "lace" ? "Lace" : "1AM"} wallet.`);
+          }
+        }
+
+        // Extract active address with multi-API fallbacks
+        let resolvedAddress: string | null = null;
+
+        if (api && typeof api.state === "function") {
+          try {
+            const st = await api.state();
+            resolvedAddress = st?.address || st?.changeAddress || st?.activeAddress || null;
+          } catch (stErr) {
+            console.warn("api.state() error:", stErr);
+          }
+        }
+
+        if (!resolvedAddress && api && typeof api.getChangeAddress === "function") {
+          try {
+            const raw = await api.getChangeAddress();
+            resolvedAddress = typeof raw === "string" ? raw : null;
+          } catch (e) {}
+        }
+
+        if (!resolvedAddress && api && typeof api.getUsedAddresses === "function") {
+          try {
+            const addrs = await api.getUsedAddresses();
+            if (Array.isArray(addrs) && addrs.length > 0) {
+              resolvedAddress = addrs[0];
+            }
+          } catch (e) {}
+        }
+
+        if (!resolvedAddress && api && typeof api.getAddress === "function") {
+          try {
+            const raw = await api.getAddress();
+            resolvedAddress = typeof raw === "string" ? raw : null;
+          } catch (e) {}
+        }
+
+        if (!resolvedAddress && api && typeof api.address === "string") {
+          resolvedAddress = api.address;
+        }
+
+        // Clean and format address
+        const finalAddress = resolvedAddress || (provider === "lace" ? "mn_addr1qg928xka9201msdf829103984029182390182" : "mn_addr1q1am928xka9201msdf829103984029182390182");
 
         this.walletState = {
           isConnected: true,
-          provider: "lace",
-          providerName: "Midnight Lace Wallet",
-          address: typeof address === "string" ? address : "mn_addr1qg928xka9201msdf829103984029182390182",
+          provider,
+          providerName: provider === "lace" ? "Midnight Lace Wallet" : "1AM Midnight Wallet",
+          address: finalAddress,
           network: this.walletState.network,
-          balanceDUST: 1420.5,
-          balanceNIGHT: 60.0,
+          balanceDUST: provider === "lace" ? 1420.5 : 980.25,
+          balanceNIGHT: provider === "lace" ? 60.0 : 45.0,
           isConnecting: false,
           error: null
         };
 
         if (typeof window !== "undefined") {
-          localStorage.setItem("veilcircle_connected_wallet", "lace");
+          localStorage.setItem("veilcircle_connected_wallet", provider);
         }
         this.notify();
         return this.walletState;
       }
 
-      if (provider === "1am") {
-        const oneAmConnector = win.midnight?.["1am"] || win.midnight?.oneam || win.oneam || win.cardano?.["1am"];
-
-        if (!oneAmConnector) {
-          throw new Error("1AM Wallet is not detected in your browser. Please install the 1AM extension or try the Testnet Sandbox.");
-        }
-
-        const api = await oneAmConnector.enable();
-        const state = api.state ? await api.state() : {};
-        const address = state.address || state.changeAddress || (api.getChangeAddress ? await api.getChangeAddress() : null) || "mn_addr1q1am928xka9201msdf829103984029182390182";
-
-        this.walletState = {
-          isConnected: true,
-          provider: "1am",
-          providerName: "1AM Midnight Wallet",
-          address: typeof address === "string" ? address : "mn_addr1q1am928xka9201msdf829103984029182390182",
-          network: this.walletState.network,
-          balanceDUST: 980.25,
-          balanceNIGHT: 45.0,
-          isConnecting: false,
-          error: null
-        };
-
-        if (typeof window !== "undefined") {
-          localStorage.setItem("veilcircle_connected_wallet", "1am");
-        }
-        this.notify();
-        return this.walletState;
-      }
-
-      // Sandbox fallback mode
-      await new Promise((r) => setTimeout(r, 400));
+      // Sandbox Mode (Always instant and 100% reliable)
+      await new Promise((r) => setTimeout(r, 300));
       this.walletState = {
         isConnected: true,
         provider: "sandbox",
@@ -257,7 +314,6 @@ class MidnightService {
     proof: ZkProofDetails;
     blockHeight: number;
   }> {
-    // 1. Generate client-side ZK proof
     const { proof, nullifier, commitment } = await generateProofForCircle(
       circleId,
       secretKeyHex,
@@ -265,7 +321,6 @@ class MidnightService {
       saltHex
     );
 
-    // 2. Submit transaction payload containing ONLY (circleId, nullifier, proof)
     const txHash = "0x" + Array.from(crypto.getRandomValues(new Uint8Array(32)))
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
