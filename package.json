@@ -1,0 +1,20 @@
+{
+  "name": "veilcircle",
+  "version": "1.0.0",
+  "description": "Prove you belong in a support group — without ever revealing who you are. Built with Compact on the Midnight blockchain.",
+  "scripts": {
+    "install:all": "npm --prefix contract install && npm --prefix frontend install",
+    "compile:contract": "npm --prefix contract run compact:compile",
+    "test:contract": "npm --prefix contract test",
+    "test:frontend": "npm --prefix frontend test",
+    "test": "npm run test:contract && npm run test:frontend",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run compile:contract && npm run build:frontend",
+    "dev": "npm --prefix frontend run dev",
+    "deploy:preview": "npm --prefix contract run deploy:preview",
+    "deploy:preprod": "npm --prefix contract run deploy:preprod"
+  },
+  "keywords": ["midnight", "compact", "zero-knowledge", "privacy", "zk-snark", "veilcircle"],
+  "author": "VeilCircle Team",
+  "license": "Apache-2.0"
+}
