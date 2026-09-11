@@ -164,21 +164,32 @@ export const LaceWalletModal: React.FC<LaceWalletModalProps> = ({
                         )}
                       </button>
                     ) : (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleSelectProvider(wallet.id)}
-                          className="px-3 py-1.5 rounded-xl text-xs font-bold text-on-surface bg-surface-container hover:bg-surface-container-high transition-colors"
+                          disabled={isConnecting}
+                          className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-on-surface bg-surface-container hover:bg-surface-container-high transition-transform active:scale-95 flex items-center gap-1"
                         >
-                          Try
+                          {isConnecting ? (
+                            <>
+                              <span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
+                              <span>Connecting...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Connect</span>
+                              <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                            </>
+                          )}
                         </button>
                         <a
                           href={wallet.websiteUrl}
                           target="_blank"
                           rel="noreferrer"
                           className="p-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-secondary transition-colors"
-                          title={`Install ${wallet.name}`}
+                          title={`Get ${wallet.name}`}
                         >
-                          <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                          <span className="material-symbols-outlined text-[18px]">download</span>
                         </a>
                       </div>
                     )}
