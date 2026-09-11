@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { LaceWalletState, WalletProviderType } from "../types";
+import React, { useState, useEffect } from "react";
+import { LaceWalletState, DetectedWallet } from "../types";
 import { NETWORKS, midnightService } from "../services/midnight";
 
 interface ConnectedWalletAccountProps {
@@ -14,61 +14,69 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
   onDisconnect
 }) => {
   const [shieldActive, setShieldActive] = useState(true);
-  const [hasCopied, setHasCopied] = useState(false);
+  const [hasCopiedAddress, setHasCopiedAddress] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [autoLockTime, setAutoLockTime] = useState("30 Minutes");
-  const [connectingProvider, setConnectingProvider] = useState<WalletProviderType | null>(null);
+  const [connectingRdns, setConnectingRdns] = useState<string | null>(null);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
+  const [availableWallets, setAvailableWallets] = useState<DetectedWallet[]>([]);
 
-  const currentNetwork = NETWORKS[walletState.network];
+  useEffect(() => {
+    const refresh = () => {
+      setAvailableWallets(midnightService.getAvailableWallets());
+    };
+    refresh();
+    const interval = setInterval(refresh, 800);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleCopy = () => {
-    if (walletState.address) {
-      navigator.clipboard.writeText(walletState.address);
-      setHasCopied(true);
-      setToastMsg("Address copied to clipboard!");
+  const currentNetwork = NETWORKS[walletState.network] || NETWORKS.preprod;
+
+  const handleCopy = (text: string, label: string) => {
+    if (text) {
+      navigator.clipboard.writeText(text);
+      setHasCopiedAddress(label);
+      setToastMsg(`${label} copied to clipboard!`);
       setTimeout(() => {
-        setHasCopied(false);
+        setHasCopiedAddress(null);
         setToastMsg(null);
       }, 2500);
     }
   };
 
-  const handleDirectConnect = async (provider: WalletProviderType) => {
+  const handleDirectConnect = async (wallet: DetectedWallet) => {
     setErrorNotice(null);
-    setConnectingProvider(provider);
+    setConnectingRdns(wallet.rdns);
     try {
-      await midnightService.connectWallet(provider);
-      setToastMsg(`Connected via ${provider === "lace" ? "Midnight Lace" : provider === "1am" ? "1AM Wallet" : "Developer Sandbox"}`);
+      await midnightService.connectWallet(wallet);
+      setToastMsg(`Connected to ${wallet.name}`);
       setTimeout(() => setToastMsg(null), 3000);
     } catch (err: any) {
-      setErrorNotice(err.message || "Connection failed.");
+      const state = midnightService.getWalletState();
+      if (state.isCancelled) {
+        setErrorNotice("Connection request was cancelled in the wallet popup.");
+      } else {
+        setErrorNotice(err?.message || "Failed to establish wallet connection.");
+      }
     } finally {
-      setConnectingProvider(null);
+      setConnectingRdns(null);
     }
   };
 
-  const handleExportSeed = () => {
-    setToastMsg("Client enclave encrypted key backup generated!");
+  const handleExportBackup = () => {
+    setToastMsg("Client enclave cryptographic backup generated!");
     setTimeout(() => setToastMsg(null), 3000);
   };
 
   const handleConfirmWipe = () => {
-    if (window.confirm("Purge local wallet session and cached circuit nullifiers from this browser? You will need your recovery phrase to re-enter.")) {
+    if (
+      window.confirm(
+        "Purge local wallet session and cached circuit nullifiers from this browser? You can reconnect anytime via your extension."
+      )
+    ) {
       onDisconnect();
       setToastMsg("Local session nullifiers securely purged.");
       setTimeout(() => setToastMsg(null), 3000);
-    }
-  };
-
-  const getWalletTitle = () => {
-    switch (walletState.provider) {
-      case "lace":
-        return "Midnight Lace Wallet • Synced";
-      case "1am":
-        return "1AM Midnight Wallet • Synced";
-      default:
-        return "Midnight Testnet Sandbox • Synced";
     }
   };
 
@@ -76,8 +84,6 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
   // Disconnected View: Serene Sanctuary Wallet Connection Portal
   // -------------------------------------------------------------
   if (!walletState.isConnected) {
-    const availableWallets = midnightService.getAvailableWallets();
-
     return (
       <div className="flex flex-col w-full gap-6 animate-fade-in max-w-3xl mx-auto pb-12">
         {/* Toast */}
@@ -105,99 +111,160 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
             Connect Your Midnight Wallet
           </h2>
           <p className="text-xs sm:text-sm text-on-surface-variant max-w-lg mx-auto mt-2 leading-relaxed">
-            VeilCircle utilizes zero-knowledge proofs on Midnight to verify your support group eligibility without revealing your identity, wallet address, or medical history.
+            VeilCircle connects directly to your 1AM or Midnight Lace extension using the official Midnight DApp Connector API. Your private credentials never leave your browser.
           </p>
 
           {errorNotice && (
             <div className="mt-5 p-4 rounded-2xl bg-error-container/80 border border-error/30 text-on-error-container text-xs text-left flex items-start gap-3 max-w-md mx-auto animate-fade-in">
               <span className="material-symbols-outlined text-[20px] text-error shrink-0">error</span>
               <div className="flex flex-col">
-                <span className="font-bold">Connection Alert</span>
+                <span className="font-bold">Connection Notice</span>
                 <p className="text-[11px] text-on-error-container/90 mt-0.5">{errorNotice}</p>
-                <button
-                  onClick={() => handleDirectConnect("sandbox")}
-                  className="mt-2 text-xs font-bold text-primary underline text-left hover:text-primary-container"
-                >
-                  Click here to continue instantly with Testnet Sandbox →
-                </button>
               </div>
             </div>
           )}
         </div>
 
-        {/* Provider Cards */}
+        {/* Detected Wallets or Honest Install Prompt */}
         <div className="flex flex-col gap-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-mono px-1">
-            Choose Privacy Provider
-          </span>
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-mono">
+              Available Midnight Extensions
+            </span>
+            <span className="text-[11px] font-mono text-primary font-bold">
+              {availableWallets.length} Detected
+            </span>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            {availableWallets.map((wallet) => {
-              const isConnecting = connectingProvider === wallet.id;
-              return (
-                <div
-                  key={wallet.id}
-                  className={`p-5 rounded-3xl border transition-all flex flex-col justify-between ${
-                    wallet.id === "sandbox"
-                      ? "border-primary/50 bg-gradient-to-b from-primary-fixed/20 to-surface-container-lowest shadow-sm"
-                      : "border-surface-container bg-surface-container-lowest hover:bg-surface-container-low shadow-xs"
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="w-12 h-12 rounded-2xl bg-surface-container-low border border-surface-container flex items-center justify-center text-2xl shadow-xs">
-                        {wallet.icon}
+          {availableWallets.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {availableWallets.map((wallet) => {
+                const isConnecting = connectingRdns === wallet.rdns;
+                return (
+                  <div
+                    key={wallet.rdns}
+                    className="p-5 rounded-3xl border border-primary/30 bg-surface-container-lowest hover:bg-surface-container-low shadow-xs transition-all flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-12 h-12 rounded-2xl bg-surface-container-low border border-surface-container flex items-center justify-center shadow-xs overflow-hidden">
+                          {wallet.icon ? (
+                            <img
+                              src={wallet.icon}
+                              alt={wallet.name}
+                              className="w-8 h-8 rounded-lg object-contain"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <span className="text-2xl">{wallet.is1AM ? "⚡" : "🪢"}</span>
+                          )}
+                        </div>
+                        <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant">
+                          Installed &amp; Ready
+                        </span>
                       </div>
-                      {wallet.isInstalled ? (
-                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant">
-                          Detected
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
-                          Web / Extension
-                        </span>
-                      )}
+                      <h3 className="font-bold text-sm text-on-surface">{wallet.name}</h3>
+                      <p className="text-[11px] font-mono text-on-surface-variant mt-1 leading-normal truncate">
+                        {wallet.rdns} • v{wallet.apiVersion}
+                      </p>
                     </div>
-                    <h3 className="font-bold text-sm text-on-surface">{wallet.name}</h3>
-                    <p className="text-[11px] text-on-surface-variant mt-1 leading-normal">
-                      {wallet.description}
+
+                    <div className="mt-5 pt-3 border-t border-surface-container">
+                      <button
+                        onClick={() => handleDirectConnect(wallet)}
+                        disabled={isConnecting}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-container shadow-xs transition-transform active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50"
+                      >
+                        {isConnecting ? (
+                          <>
+                            <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                            <span>Approving in Extension...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Connect Wallet</span>
+                            <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            /* Honest Empty State: No Extension Installed */
+            <div className="space-y-4">
+              <div className="p-6 rounded-3xl bg-surface-container-low border border-surface-container text-center shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-surface-container-lowest mx-auto flex items-center justify-center text-on-surface-variant mb-3 border border-surface-container">
+                  <span className="material-symbols-outlined text-[26px]">extension_off</span>
+                </div>
+                <h4 className="font-bold text-sm text-on-surface">No Midnight Wallet Extension Detected</h4>
+                <p className="text-xs text-on-surface-variant mt-1 max-w-md mx-auto leading-relaxed">
+                  VeilCircle communicates directly with Midnight browser extensions using standard CIP-30 / DApp Connector protocols. Please install either 1AM or Lace to connect:
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {/* 1AM Wallet Install Link */}
+                <div className="p-4 rounded-3xl border border-surface-container bg-surface-container-lowest flex flex-col justify-between shadow-xs">
+                  <div>
+                    <div className="w-10 h-10 rounded-2xl bg-secondary-fixed flex items-center justify-center text-xl mb-3 shadow-xs">
+                      ⚡
+                    </div>
+                    <h5 className="font-bold text-sm text-on-surface">1AM Midnight Wallet</h5>
+                    <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
+                      Optimized for zero-knowledge proofs and fast contract execution on Midnight Network.
                     </p>
                   </div>
-
-                  <div className="mt-5 pt-3 border-t border-surface-container">
-                    <button
-                      onClick={() => handleDirectConnect(wallet.id)}
-                      disabled={isConnecting}
-                      className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-transform active:scale-95 flex items-center justify-center gap-1.5 ${
-                        wallet.id === "sandbox"
-                          ? "bg-primary text-on-primary hover:bg-primary-container shadow-xs"
-                          : "bg-surface-container hover:bg-surface-container-high text-on-surface"
-                      } disabled:opacity-50`}
+                  <div className="mt-4 pt-3 border-t border-surface-container">
+                    <a
+                      href="https://1am.xyz"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-2 px-3 rounded-xl bg-primary text-on-primary hover:bg-primary-container text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
                     >
-                      {isConnecting ? (
-                        <>
-                          <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-                          <span>Connecting...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>{wallet.id === "sandbox" ? "Launch Sandbox" : "Connect"}</span>
-                          <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-                        </>
-                      )}
-                    </button>
+                      <span>Install 1AM Wallet</span>
+                      <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                    </a>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Midnight Lace Install Link */}
+                <div className="p-4 rounded-3xl border border-surface-container bg-surface-container-lowest flex flex-col justify-between shadow-xs">
+                  <div>
+                    <div className="w-10 h-10 rounded-2xl bg-primary-fixed flex items-center justify-center text-xl mb-3 shadow-xs">
+                      🪢
+                    </div>
+                    <h5 className="font-bold text-sm text-on-surface">Midnight Lace Wallet</h5>
+                    <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
+                      The official Lace browser extension tailored for Midnight tokens and smart contracts.
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-surface-container">
+                    <a
+                      href="https://www.lace.io"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-2 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <span>Install Lace</span>
+                      <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Privacy Guarantees */}
         <div className="rounded-3xl p-5 sm:p-6 bg-surface-container-low shadow-sm border border-surface-container flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-[22px]">verified_user</span>
-            <h3 className="font-bold text-sm text-on-surface">Zero-Knowledge Guard Guarantees</h3>
+            <h3 className="font-bold text-sm text-on-surface">Zero-Knowledge Privacy Guarantees</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
             <div className="p-3.5 rounded-2xl bg-surface-container-lowest flex gap-3 shadow-xs border border-surface-container">
@@ -205,7 +272,7 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
               <div>
                 <h4 className="font-bold text-xs text-on-surface">Zero On-Chain Linkability</h4>
                 <p className="text-[11px] text-on-surface-variant mt-0.5">
-                  Your wallet address stays local on your device. Support circles never record your identity.
+                  Your wallet address stays local on your device. Support circles never record your real identity.
                 </p>
               </div>
             </div>
@@ -225,8 +292,10 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
   }
 
   // -------------------------------------------------------------
-  // Connected View: Serene Sanctuary Enclave & Wallet Dashboard
+  // Connected View: Serene Sanctuary Real Enclave & Wallet Dashboard
   // -------------------------------------------------------------
+  const primaryAddress = walletState.shieldedAddress || walletState.address || "";
+
   return (
     <div className="flex flex-col w-full gap-5 animate-fade-in max-w-3xl mx-auto pb-12">
       {/* Toast */}
@@ -237,13 +306,13 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
         </div>
       )}
 
-      {/* Atmospheric Accent Layer */}
+      {/* Primary Account Card */}
       <div className="relative w-full overflow-hidden rounded-3xl p-5 sm:p-6 bg-gradient-to-br from-surface-container-low via-surface-container-lowest to-surface-container shadow-xs border border-surface-container">
         <div className="flex items-center justify-between mb-4">
           <div className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full bg-primary-fixed text-on-primary-fixed shadow-xs">
             <span className="w-2 h-2 rounded-full bg-primary animate-ping"></span>
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">
-              {getWalletTitle()}
+              {walletState.providerName || "Midnight Wallet"} • Synced
             </span>
           </div>
           <div className="flex items-center gap-1 text-on-surface-variant">
@@ -252,47 +321,101 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-mono">
-              Primary Account Address
-            </span>
-            <span className="text-[10px] font-bold text-secondary bg-secondary-fixed px-2 py-0.5 rounded-full font-mono uppercase">
-              Midnight {walletState.network}
-            </span>
+        <div className="flex flex-col gap-3">
+          {/* Shielded Address */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-mono flex items-center gap-1">
+                <span>Shielded Address</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary-fixed text-on-primary-fixed-variant">ZK Private</span>
+              </span>
+              <span className="text-[10px] font-bold text-secondary bg-secondary-fixed px-2 py-0.5 rounded-full font-mono uppercase">
+                Midnight {walletState.network}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-2 p-3.5 rounded-2xl bg-surface-container-lowest shadow-xs border border-surface-container">
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-xs sm:text-sm text-on-surface font-mono truncate">
+                  {primaryAddress}
+                </span>
+                <span className="text-[11px] text-on-surface-variant mt-0.5 flex items-center gap-1 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  <span>Provider RDNS: {walletState.provider}</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <button
+                  onClick={() => handleCopy(primaryAddress, "Shielded Address")}
+                  className="p-2 rounded-xl bg-surface-container-low text-primary hover:bg-surface-container active:scale-95 transition-transform"
+                  title="Copy Shielded Address"
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {hasCopiedAddress === "Shielded Address" ? "check" : "content_copy"}
+                  </span>
+                </button>
+                <a
+                  href={`${currentNetwork.explorerUrl}/accounts/${primaryAddress}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2 rounded-xl bg-surface-container-low text-secondary hover:bg-surface-container active:scale-95 transition-transform"
+                  title="Midnight Explorer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                </a>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between gap-2 p-3.5 rounded-2xl bg-surface-container-lowest shadow-xs mt-1 border border-surface-container">
-            <div className="flex flex-col min-w-0">
-              <span className="font-bold text-xs sm:text-sm text-on-surface font-mono truncate">
-                {walletState.address || "mn_addr_testnet1qq9x48k...7f2w0p"}
-              </span>
-              <span className="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
-                <span>Key Material: Device Secure Storage</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <button
-                onClick={handleCopy}
-                className="p-2 rounded-xl bg-surface-container-low text-primary hover:bg-surface-container active:scale-95 transition-transform"
-                title="Copy Address"
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {hasCopied ? "check" : "content_copy"}
+          {/* Unshielded Address (if available) */}
+          {walletState.unshieldedAddress && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-mono">
+                  Transparent / Unshielded Address
                 </span>
-              </button>
-              <a
-                href={`${currentNetwork.explorerUrl}/accounts/${walletState.address}`}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 rounded-xl bg-surface-container-low text-secondary hover:bg-surface-container active:scale-95 transition-transform"
-                title="Midnight Explorer"
-              >
-                <span className="material-symbols-outlined text-[18px]">open_in_new</span>
-              </a>
+              </div>
+              <div className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-surface-container-lowest shadow-xs border border-surface-container">
+                <span className="font-mono text-xs text-on-surface truncate">
+                  {walletState.unshieldedAddress}
+                </span>
+                <button
+                  onClick={() => handleCopy(walletState.unshieldedAddress!, "Unshielded Address")}
+                  className="p-1.5 rounded-lg bg-surface-container-low text-on-surface hover:bg-surface-container"
+                  title="Copy Unshielded Address"
+                >
+                  <span className="material-symbols-outlined text-[16px]">
+                    {hasCopiedAddress === "Unshielded Address" ? "check" : "content_copy"}
+                  </span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Dust Address (if available) */}
+          {walletState.dustAddress && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-mono">
+                  Dust Registration Address
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-surface-container-lowest shadow-xs border border-surface-container">
+                <span className="font-mono text-xs text-on-surface truncate">
+                  {walletState.dustAddress}
+                </span>
+                <button
+                  onClick={() => handleCopy(walletState.dustAddress!, "Dust Address")}
+                  className="p-1.5 rounded-lg bg-surface-container-low text-on-surface hover:bg-surface-container"
+                  title="Copy Dust Address"
+                >
+                  <span className="material-symbols-outlined text-[16px]">
+                    {hasCopiedAddress === "Dust Address" ? "check" : "content_copy"}
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Active Shielding Switch */}
@@ -324,31 +447,80 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
 
       {/* Balance & Gas Relayer Reserve Card */}
       <div className="relative w-full rounded-3xl p-5 sm:p-6 bg-surface-container-lowest shadow-sm border border-surface-container">
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-surface-container">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-mono">
-              Shielded Balance
-            </span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl sm:text-3xl font-black text-primary">
-                {walletState.balanceDUST.toFixed(2)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 mb-4 border-b border-surface-container">
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container-low border border-surface-container">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant font-mono">
+                Shielded DUST Balance
               </span>
-              <span className="text-sm font-semibold text-on-surface-variant font-mono">tDUST</span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-2xl sm:text-3xl font-black text-primary">
+                  {walletState.balanceDUST.toFixed(2)}
+                </span>
+                <span className="text-xs font-semibold text-on-surface-variant font-mono">tDUST</span>
+              </div>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary shadow-xs">
+              <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                token
+              </span>
             </div>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-surface-container-low flex items-center justify-center text-primary shadow-xs">
-            <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              token
-            </span>
+
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container-low border border-surface-container">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant font-mono">
+                Unshielded Balance
+              </span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-2xl sm:text-3xl font-black text-secondary">
+                  {walletState.balanceNIGHT.toFixed(2)}
+                </span>
+                <span className="text-xs font-semibold text-on-surface-variant font-mono">NIGHT</span>
+              </div>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary shadow-xs">
+              <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+            </div>
           </div>
         </div>
+
+        {/* Midnight Service Endpoints Config (from Wallet getConfiguration) */}
+        {walletState.serviceConfig && (
+          <div className="p-3.5 rounded-2xl bg-surface-container-low flex flex-col gap-2 mb-4 border border-surface-container">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[18px]">dns</span>
+              <span className="font-bold text-xs text-on-surface">Connected Wallet Endpoints</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-on-surface-variant">
+              {walletState.serviceConfig.indexerUri && (
+                <div className="p-2 rounded-xl bg-surface-container-lowest truncate">
+                  <span className="font-bold text-on-surface">Indexer: </span>
+                  <span>{walletState.serviceConfig.indexerUri}</span>
+                </div>
+              )}
+              {walletState.serviceConfig.substrateNodeUri && (
+                <div className="p-2 rounded-xl bg-surface-container-lowest truncate">
+                  <span className="font-bold text-on-surface">Substrate Node: </span>
+                  <span>{walletState.serviceConfig.substrateNodeUri}</span>
+                </div>
+              )}
+              {walletState.serviceConfig.proverServerUri && (
+                <div className="p-2 rounded-xl bg-surface-container-lowest truncate col-span-1 sm:col-span-2">
+                  <span className="font-bold text-on-surface">Prover: </span>
+                  <span>{walletState.serviceConfig.proverServerUri}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Gasless Relayer Information */}
         <div className="p-3.5 rounded-2xl bg-surface-container-low flex items-start gap-3 mb-4 border border-surface-container">
           <span className="material-symbols-outlined text-secondary text-[24px] mt-0.5">bolt</span>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-xs sm:text-sm text-on-surface">Automated Relayer Active</span>
+              <span className="font-bold text-xs sm:text-sm text-on-surface">Automated ZK Relayer Active</span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-mono uppercase">
                 GASLESS
               </span>
@@ -376,6 +548,9 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
             <span>Disconnect</span>
           </button>
         </div>
+        <p className="text-[10px] text-on-surface-variant text-center mt-2.5 font-medium">
+          Disconnect is app-side. To revoke dApp permissions completely, manage authorized origins in your wallet extension settings.
+        </p>
       </div>
 
       {/* Zero-Knowledge Guard Explainer */}
@@ -471,12 +646,12 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
         <h3 className="font-bold text-base text-on-surface px-1">Security & Device Safety</h3>
 
         <button
-          onClick={handleExportSeed}
+          onClick={handleExportBackup}
           className="w-full py-3.5 px-4 rounded-2xl bg-primary text-on-primary shadow-xs hover:bg-primary-container transition-colors flex items-center justify-between active:scale-[0.99]"
         >
           <div className="flex items-center gap-2.5">
             <span className="material-symbols-outlined text-[20px]">key</span>
-            <span className="font-bold text-xs sm:text-sm">Export Encrypted Seed Backup</span>
+            <span className="font-bold text-xs sm:text-sm">Export Encrypted Enclave Backup</span>
           </div>
           <span className="material-symbols-outlined text-[18px]">chevron_right</span>
         </button>

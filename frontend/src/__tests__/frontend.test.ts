@@ -1,9 +1,26 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, beforeAll } from "vitest";
 import { computeCommitment, computeNullifier, generateProofForCircle, generateRandomHex } from "../services/crypto";
 import { DEFAULT_CIRCLES } from "../services/mockData";
-import { midnightService } from "../services/midnight";
+import { midnightService, getAvailableWallets } from "../services/midnight";
 
 describe("Frontend Crypto & Midnight Integration", () => {
+  beforeAll(() => {
+    if (typeof (globalThis as any).window === "undefined") {
+      (globalThis as any).window = globalThis;
+    }
+  });
+
+  beforeEach(() => {
+    midnightService.disconnectWallet();
+    delete (window as any).midnight;
+    delete (window as any).cardano;
+  });
+
+  afterEach(() => {
+    delete (window as any).midnight;
+    delete (window as any).cardano;
+  });
+
   it("1. Generates deterministic commitments from private witness values", async () => {
     const secretKeyHex = "8f29c4ba03e9112a9bc490d347890ef9923841cd2789123490abbacde0912384";
     const attributeHex = "12a9bc490d347890ef9923841cd278918f29c4ba03e9123490abbacde0912384";
@@ -42,24 +59,78 @@ describe("Frontend Crypto & Midnight Integration", () => {
     expect(result.proof.witnessBlinded).toBe(true);
   });
 
-  it("4. Detects available Midnight wallets (Lace, 1AM, Sandbox)", () => {
+  it("4. Returns empty wallet list when no Midnight extensions are injected in window", () => {
     const wallets = midnightService.getAvailableWallets();
-    expect(wallets.length).toBe(3);
-    expect(wallets.find((w) => w.id === "lace")).toBeDefined();
-    expect(wallets.find((w) => w.id === "1am")).toBeDefined();
-    expect(wallets.find((w) => w.id === "sandbox")).toBeDefined();
+    expect(wallets.length).toBe(0);
   });
 
-  it("5. Connects to Midnight sandbox with funded DUST balance and disconnects cleanly", async () => {
-    const state = await midnightService.connectWallet("sandbox");
-    expect(state.isConnected).toBe(true);
-    expect(state.provider).toBe("sandbox");
-    expect(state.balanceDUST).toBeGreaterThan(0);
-    expect(state.address).toBeDefined();
+  it("5. Dynamically discovers 1AM and Lace when injected into window.midnight", async () => {
+    (window as any).midnight = {
+      "1am": {
+        name: "1AM Wallet",
+        rdns: "xyz.1am.wallet",
+        icon: "data:image/svg+xml;base64,mock1am",
+        apiVersion: "1.1.0",
+        connect: async () => ({
+          getShieldedAddresses: async () => ({ shieldedAddress: "mn_addr_testnet1qq9x48k7f2w0p1am" }),
+          getUnshieldedAddress: async () => ({ unshieldedAddress: "mn_unshielded1am" }),
+          getDustAddress: async () => ({ dustAddress: "mn_dust1am" }),
+          getDustBalance: async () => ({ balance: 25000000n, cap: 100000000n }),
+          getUnshieldedBalances: async () => ({ "00": 50000000n }),
+          getConfiguration: async () => ({
+            indexerUri: "https://indexer.preprod.midnight.network",
+            indexerWsUri: "wss://indexer.preprod.midnight.network",
+            substrateNodeUri: "https://rpc.preprod.midnight.network",
+            proverServerUri: "http://localhost:6300",
+            networkId: "preprod"
+          })
+        })
+      },
+      "mnLace": {
+        name: "Midnight Lace",
+        rdns: "io.lace.midnight",
+        icon: "data:image/svg+xml;base64,mocklace",
+        apiVersion: "1.0.0",
+        connect: async () => ({
+          getShieldedAddresses: async () => ({ shieldedAddress: "mn_addr_testnet1qq9x48k7f2w0place" }),
+          getUnshieldedAddress: async () => ({ unshieldedAddress: "mn_unshieldedlace" }),
+          getDustAddress: async () => ({ dustAddress: "mn_dustlace" }),
+          getDustBalance: async () => ({ balance: 12000000n, cap: 50000000n }),
+          getUnshieldedBalances: async () => ({ "00": 10000000n }),
+          getConfiguration: async () => ({
+            indexerUri: "https://indexer.preprod.midnight.network",
+            indexerWsUri: "wss://indexer.preprod.midnight.network",
+            substrateNodeUri: "https://rpc.preprod.midnight.network",
+            proverServerUri: "http://localhost:6300",
+            networkId: "preprod"
+          })
+        })
+      }
+    };
 
+    const wallets = midnightService.getAvailableWallets();
+    expect(wallets.length).toBe(2);
+
+    const oneAm = wallets.find((w) => w.is1AM);
+    expect(oneAm).toBeDefined();
+    expect(oneAm?.rdns).toBe("xyz.1am.wallet");
+
+    const lace = wallets.find((w) => w.isLace);
+    expect(lace).toBeDefined();
+    expect(lace?.rdns).toBe("io.lace.midnight");
+
+    // Connect to 1AM
+    const state = await midnightService.connectWallet(oneAm!);
+    expect(state.isConnected).toBe(true);
+    expect(state.provider).toBe("xyz.1am.wallet");
+    expect(state.shieldedAddress).toBe("mn_addr_testnet1qq9x48k7f2w0p1am");
+    expect(state.balanceDUST).toBe(25);
+    expect(state.serviceConfig?.proverServerUri).toBe("http://localhost:6300");
+
+    // Disconnect
     midnightService.disconnectWallet();
-    const disconnectedState = midnightService.getWalletState();
-    expect(disconnectedState.isConnected).toBe(false);
-    expect(disconnectedState.address).toBeNull();
+    const disconnected = midnightService.getWalletState();
+    expect(disconnected.isConnected).toBe(false);
+    expect(disconnected.address).toBeNull();
   });
 });

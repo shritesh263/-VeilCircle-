@@ -81,27 +81,36 @@ export interface NetworkConfig {
   explorerUrl: string;
 }
 
-export type WalletProviderType = "lace" | "1am" | "sandbox";
+import type { InitialAPI, ConnectedAPI, Configuration } from '@midnight-ntwrk/dapp-connector-api';
 
-export interface WalletProviderInfo {
-  id: WalletProviderType;
+export interface DetectedWallet {
+  id: string;
+  rdns: string;
   name: string;
-  description: string;
   icon: string;
-  websiteUrl: string;
-  isInstalled: boolean;
+  apiVersion: string;
+  is1AM: boolean;
+  isLace: boolean;
+  api: InitialAPI;
 }
 
 export interface LaceWalletState {
   isConnected: boolean;
-  provider: WalletProviderType;
+  provider: string; // rdns or wallet id
   providerName: string;
+  icon: string | null;
   address: string | null;
+  shieldedAddress: string | null;
+  unshieldedAddress: string | null;
+  dustAddress: string | null;
   network: "preview" | "preprod";
   balanceDUST: number;
   balanceNIGHT: number;
+  serviceConfig: Configuration | null;
+  connectedAPI: ConnectedAPI | null;
   isConnecting: boolean;
   error: string | null;
+  isCancelled: boolean;
 }
 
 export interface AnonymousMessage {
@@ -113,5 +122,6 @@ export interface AnonymousMessage {
   verifiedShield: boolean;
   zkProofSnippet: string;
 }
+
 
 

@@ -1,4 +1,7 @@
-import { LaceWalletState, NetworkConfig, WalletProviderInfo, WalletProviderType, ZkProofDetails } from "../types";
+import '@midnight-ntwrk/dapp-connector-api';
+import type { InitialAPI, ConnectedAPI, Configuration, APIError } from '@midnight-ntwrk/dapp-connector-api';
+import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
+import { LaceWalletState, NetworkConfig, DetectedWallet, ZkProofDetails } from "../types";
 import { generateProofForCircle } from "./crypto";
 
 export const NETWORKS: Record<string, NetworkConfig> = {
@@ -21,137 +24,103 @@ export const NETWORKS: Record<string, NetworkConfig> = {
 };
 
 /**
- * Safely inspects the browser window for a specific wallet extension
+ * Generic wallet discovery: Inspects window.midnight entries dynamically
+ * and identifies Lace vs 1AM by inspecting rdns / name on each returned InitialAPI.
  */
-function findConnector(provider: "lace" | "1am"): any | null {
-  if (typeof window === "undefined") return null;
+export function getAvailableWallets(): DetectedWallet[] {
+  if (typeof window === "undefined") return [];
   const win = window as any;
+  const detected: DetectedWallet[] = [];
+  const seenRdns = new Set<string>();
 
-  if (provider === "1am") {
-    // 1. Check window.midnight root if it's the 1AM provider
-    if (win.midnight && typeof win.midnight === "object") {
-      if (typeof win.midnight.connect === "function" || typeof win.midnight.enable === "function" || win.midnight.name === "1AM" || win.midnight.name === "1am") {
-        return win.midnight;
-      }
+  // 1. Generic enumeration of window.midnight
+  if (win.midnight && typeof win.midnight === "object") {
+    for (const [key, apiObj] of Object.entries(win.midnight)) {
+      if (apiObj && typeof apiObj === "object") {
+        const initialAPI = apiObj as InitialAPI;
+        const rdns = initialAPI.rdns || key;
+        const name = initialAPI.name || key;
+        const icon = typeof initialAPI.icon === "string" ? initialAPI.icon : "";
+        const apiVersion = initialAPI.apiVersion || "1.0.0";
 
-      // Check window.midnight sub-keys dynamically
-      for (const key of Object.keys(win.midnight)) {
-        if (/1am|oneam|one-am/i.test(key)) {
-          const c = win.midnight[key];
-          if (c) return c;
+        if (!seenRdns.has(rdns)) {
+          seenRdns.add(rdns);
+          const is1AM = /1am|oneam/i.test(rdns) || /1am|oneam/i.test(name) || /1am|oneam/i.test(key);
+          const isLace = /lace/i.test(rdns) || /lace/i.test(name) || /lace|mnlace/i.test(key);
+
+          detected.push({
+            id: key,
+            rdns,
+            name: is1AM ? "1AM Midnight Wallet" : isLace ? "Midnight Lace Wallet" : name,
+            icon,
+            apiVersion,
+            is1AM,
+            isLace,
+            api: initialAPI
+          });
         }
       }
     }
-
-    // 2. Check window.cardano keys
-    if (win.cardano && typeof win.cardano === "object") {
-      if (win.cardano.midnight && typeof win.cardano.midnight === "object") {
-        if (/1am/i.test(win.cardano.midnight.name || "") || typeof win.cardano.midnight.connect === "function" || typeof win.cardano.midnight.enable === "function") {
-          return win.cardano.midnight;
-        }
-      }
-
-      for (const key of Object.keys(win.cardano)) {
-        if (/1am|oneam|one-am/i.test(key)) {
-          const c = win.cardano[key];
-          if (c) return c;
-        }
-      }
-    }
-
-    // 3. Direct window properties
-    const directCandidates = [
-      win["1AM"],
-      win["1am"],
-      win.oneam,
-      win.OneAM,
-      win.oneAm,
-      win.midnightOneAm,
-      win.midnight1AM
-    ];
-
-    for (const c of directCandidates) {
-      if (c && (typeof c.connect === "function" || typeof c.enable === "function" || typeof c.isEnabled === "function" || typeof c.state === "function" || typeof c.getAddress === "function")) {
-        return c;
-      }
-    }
-
-    // Fallback: If window.midnight exists as an object, return it
-    if (win.midnight && typeof win.midnight === "object") {
-      return win.midnight;
-    }
-
-    return null;
   }
 
-  if (provider === "lace") {
-    // 1. Dynamic regex search on window.midnight
-    if (win.midnight && typeof win.midnight === "object") {
-      if (win.midnight.mnLace || win.midnight.lace) {
-        return win.midnight.mnLace || win.midnight.lace;
-      }
-      for (const key of Object.keys(win.midnight)) {
-        if (/lace|mnlace/i.test(key)) {
-          const c = win.midnight[key];
-          if (c) return c;
-        }
-      }
+  // 2. Legacy fallback path for older Midnight Lace builds (window.cardano.midnight / window.cardano.lace)
+  if (win.cardano?.midnight && typeof win.cardano.midnight === "object") {
+    const apiObj = win.cardano.midnight as InitialAPI;
+    const rdns = apiObj.rdns || "io.lace.midnight";
+    if (!seenRdns.has(rdns)) {
+      seenRdns.add(rdns);
+      console.info("[VeilCircle] Using fallback discovery path: window.cardano.midnight");
+      detected.push({
+        id: "cardano.midnight",
+        rdns,
+        name: apiObj.name || "Midnight Lace Wallet",
+        icon: typeof apiObj.icon === "string" ? apiObj.icon : "",
+        apiVersion: apiObj.apiVersion || "1.0.0",
+        is1AM: /1am/i.test(apiObj.name || ""),
+        isLace: true,
+        api: apiObj
+      });
     }
-
-    // 2. Dynamic regex search on window.cardano
-    if (win.cardano && typeof win.cardano === "object") {
-      if (win.cardano.lace || win.cardano.mnLace) {
-        return win.cardano.lace || win.cardano.mnLace;
-      }
-      for (const key of Object.keys(win.cardano)) {
-        if (/lace|mnlace/i.test(key)) {
-          const c = win.cardano[key];
-          if (c) return c;
-        }
-      }
-    }
-
-    // 3. Direct window properties
-    const directCandidates = [
-      win.midnightLace,
-      win.mnLace,
-      win.lace
-    ];
-
-    for (const c of directCandidates) {
-      if (c) return c;
-    }
-
-    return null;
   }
 
-  return null;
+  return detected;
 }
 
 class MidnightService {
   private walletState: LaceWalletState = {
     isConnected: false,
-    provider: "sandbox",
-    providerName: "Testnet Sandbox",
+    provider: "",
+    providerName: "",
+    icon: null,
     address: null,
+    shieldedAddress: null,
+    unshieldedAddress: null,
+    dustAddress: null,
     network: "preprod",
     balanceDUST: 0,
     balanceNIGHT: 0,
+    serviceConfig: null,
+    connectedAPI: null,
     isConnecting: false,
-    error: null
+    error: null,
+    isCancelled: false
   };
 
   private listeners: ((state: LaceWalletState) => void)[] = [];
 
   constructor() {
-    if (typeof window !== "undefined") {
-      const savedProvider = localStorage.getItem("veilcircle_connected_wallet") as WalletProviderType | null;
-      if (savedProvider) {
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      // Check for silent auto-reconnect if user previously approved this origin
+      const lastRdns = localStorage.getItem("veilcircle_last_wallet_rdns");
+      if (lastRdns) {
         setTimeout(() => {
-          this.connectWallet(savedProvider).catch(() => {
-            localStorage.removeItem("veilcircle_connected_wallet");
+          this.attemptSilentReconnect(lastRdns).catch(() => {
+            // Keep disconnected without spamming popups
+            if (typeof localStorage !== "undefined") {
+              localStorage.removeItem("veilcircle_last_wallet_rdns");
+            }
           });
-        }, 300);
+        }, 350);
       }
     }
   }
@@ -172,243 +141,263 @@ class MidnightService {
     this.listeners.forEach((l) => l(this.getWalletState()));
   }
 
-  /**
-   * Check which wallets are currently installed in the browser window
-   */
-  public getAvailableWallets(): WalletProviderInfo[] {
-    const laceConnector = findConnector("lace");
-    const oneAmConnector = findConnector("1am");
-
-    return [
-      {
-        id: "1am",
-        name: "1AM Midnight Wallet",
-        description: "Official privacy wallet purpose-built for Midnight network shielded tokens & ZK signing.",
-        icon: "⚡",
-        websiteUrl: "https://1am.xyz",
-        isInstalled: Boolean(oneAmConnector)
-      },
-      {
-        id: "lace",
-        name: "Midnight Lace Wallet",
-        description: "Official privacy wallet for Midnight token balancing & zero-knowledge contracts.",
-        icon: "🪢",
-        websiteUrl: "https://www.lace.io",
-        isInstalled: Boolean(laceConnector)
-      },
-      {
-        id: "sandbox",
-        name: "Midnight Testnet Sandbox",
-        description: "Pre-configured developer sandbox with 850 DUST & 25 NIGHT for instant zero-friction testing.",
-        icon: "✨",
-        websiteUrl: "https://midnight.network",
-        isInstalled: true
-      }
-    ];
+  public getAvailableWallets(): DetectedWallet[] {
+    return getAvailableWallets();
   }
 
   /**
-   * Robust connection handler for real Lace, 1AM, or Testnet Sandbox
+   * Attempt silent reconnect on page reload only if already authorized
    */
-  public async connectWallet(provider: WalletProviderType): Promise<LaceWalletState> {
+  private async attemptSilentReconnect(rdns: string): Promise<void> {
+    const wallets = getAvailableWallets();
+    const target = wallets.find((w) => w.rdns === rdns || w.id === rdns);
+    if (!target) return;
+
+    // Only reconnect if isEnabled or isAuthorized is true (avoids popup spam)
+    if (typeof (target.api as any).isEnabled === "function") {
+      const isEnabled = await (target.api as any).isEnabled();
+      if (!isEnabled) return;
+    }
+
+    await this.connectWallet(target);
+  }
+
+  /**
+   * Real, production-grade connection flow through official DApp Connector API.
+   * NO MOCKS, NO STUBS.
+   */
+  public async connectWallet(walletOrRdns: DetectedWallet | string): Promise<LaceWalletState> {
     this.walletState = {
       ...this.walletState,
       isConnecting: true,
-      error: null
+      error: null,
+      isCancelled: false
     };
     this.notify();
 
-    try {
-      if (provider === "1am" || provider === "lace") {
-        let connector = findConnector(provider);
+    let wallet: DetectedWallet | undefined;
+    if (typeof walletOrRdns === "string") {
+      const wallets = getAvailableWallets();
+      wallet = wallets.find((w) => w.rdns === walletOrRdns || w.id === walletOrRdns || (walletOrRdns === "1am" && w.is1AM) || (walletOrRdns === "lace" && w.isLace));
+    } else {
+      wallet = walletOrRdns;
+    }
 
-        // If not found right away, wait briefly (250ms) for extension injection and try once more
-        if (!connector) {
-          await new Promise((r) => setTimeout(r, 250));
-          connector = findConnector(provider);
-        }
-
-        let resolvedAddress: string | null = null;
-        let isRealExtension = false;
-        let resolvedDustBalance: number = provider === "1am" ? 980.25 : 1420.5;
-        let resolvedNightBalance: number = provider === "1am" ? 45.0 : 60.0;
-
-        // If real browser extension is present, invoke Midnight DApp Connector API or CIP-30
-        if (connector) {
-          try {
-            let api: any = null;
-
-            // Method 1: connector.connect(network) - standard Midnight dApp connector API
-            if (typeof connector.connect === "function") {
-              try {
-                api = await connector.connect(this.walletState.network);
-              } catch (connErr1) {
-                console.warn("connector.connect(network) failed, trying enable():", connErr1);
-              }
-            }
-
-            // Method 2: connector.enable() - CIP-30 / Cardano / Midnight
-            if (!api && typeof connector.enable === "function") {
-              try {
-                api = await connector.enable();
-              } catch (connErr2: any) {
-                if (connErr2?.message?.includes("reject") || connErr2?.message?.includes("denied") || connErr2?.message?.includes("cancel")) {
-                  throw new Error(`Connection request was declined in ${provider === "1am" ? "1AM" : "Lace"} wallet.`);
-                }
-                throw connErr2;
-              }
-            }
-
-            // Method 3: connector as function
-            if (!api && typeof connector === "function") {
-              try {
-                api = await connector();
-              } catch (e) {}
-            }
-
-            // Method 4: connector is already the active API
-            if (!api && (typeof connector.state === "function" || typeof connector.getAddress === "function" || typeof connector.getChangeAddress === "function")) {
-              api = connector;
-            }
-
-            if (api) {
-              isRealExtension = true;
-
-              // 1. Try state()
-              if (typeof api.state === "function") {
-                try {
-                  const st = await api.state();
-                  resolvedAddress = st?.address || st?.shieldedAddress || st?.changeAddress || st?.activeAddress || null;
-                  if (typeof st?.dust === "number") resolvedDustBalance = st.dust;
-                  if (typeof st?.night === "number") resolvedNightBalance = st.night;
-                } catch (e) {}
-              }
-
-              // 2. Try getChangeAddress()
-              if (!resolvedAddress && typeof api.getChangeAddress === "function") {
-                try {
-                  const raw = await api.getChangeAddress();
-                  resolvedAddress = typeof raw === "string" ? raw : null;
-                } catch (e) {}
-              }
-
-              // 3. Try getUsedAddresses()
-              if (!resolvedAddress && typeof api.getUsedAddresses === "function") {
-                try {
-                  const addrs = await api.getUsedAddresses();
-                  if (Array.isArray(addrs) && addrs.length > 0) {
-                    resolvedAddress = addrs[0];
-                  }
-                } catch (e) {}
-              }
-
-              // 4. Try getAddress()
-              if (!resolvedAddress && typeof api.getAddress === "function") {
-                try {
-                  const raw = await api.getAddress();
-                  resolvedAddress = typeof raw === "string" ? raw : null;
-                } catch (e) {}
-              }
-
-              // 5. Direct property
-              if (!resolvedAddress && typeof api.address === "string") {
-                resolvedAddress = api.address;
-              }
-
-              // 6. Try balances
-              if (typeof api.getShieldedBalances === "function") {
-                try {
-                  const bal = await api.getShieldedBalances();
-                  if (bal?.dust) resolvedDustBalance = Number(bal.dust);
-                  if (bal?.night) resolvedNightBalance = Number(bal.night);
-                } catch (e) {}
-              }
-            }
-          } catch (connErr: any) {
-            console.warn(`Extension connection failed for ${provider}:`, connErr);
-            if (connErr?.message?.includes("declined") || connErr?.message?.includes("reject") || connErr?.message?.includes("denied")) {
-              throw connErr;
-            }
-          }
-        }
-
-        // Format final address (real or authentic testnet enclave)
-        const finalAddress =
-          resolvedAddress ||
-          (provider === "1am"
-            ? "mn_addr1q1am928xka9201msdf829103984029182390182"
-            : "mn_addr1qlace928xka9201msdf829103984029182390182");
-
-        const providerLabel =
-          provider === "1am"
-            ? isRealExtension ? "1AM Midnight Wallet (Live Extension)" : "1AM Midnight Wallet"
-            : isRealExtension ? "Midnight Lace Wallet (Live Extension)" : "Midnight Lace Wallet";
-
-        this.walletState = {
-          isConnected: true,
-          provider,
-          providerName: providerLabel,
-          address: finalAddress,
-          network: this.walletState.network,
-          balanceDUST: resolvedDustBalance,
-          balanceNIGHT: resolvedNightBalance,
-          isConnecting: false,
-          error: null
-        };
-
-        if (typeof window !== "undefined") {
-          localStorage.setItem("veilcircle_connected_wallet", provider);
-        }
-        this.notify();
-        return this.walletState;
-      }
-
-
-      // Sandbox Mode (Instant developer testnet)
-      await new Promise((r) => setTimeout(r, 250));
-      this.walletState = {
-        isConnected: true,
-        provider: "sandbox",
-        providerName: "Testnet Developer Sandbox",
-        address: "mn_addr1qg928xka9201msdf829103984029182390182",
-        network: this.walletState.network,
-        balanceDUST: 850.5,
-        balanceNIGHT: 25.0,
-        isConnecting: false,
-        error: null
-      };
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem("veilcircle_connected_wallet", "sandbox");
-      }
-      this.notify();
-      return this.walletState;
-    } catch (err: any) {
+    if (!wallet) {
+      const errMsg = "Selected Midnight wallet extension was not found. Please install the extension in your browser.";
       this.walletState = {
         ...this.walletState,
         isConnecting: false,
-        error: err.message || "Failed to connect wallet."
+        error: errMsg,
+        isCancelled: false
       };
       this.notify();
-      throw err;
+      throw new Error(errMsg);
+    }
+
+    try {
+      let connectedAPI: ConnectedAPI;
+
+      // Call the real authorization method (triggers the browser extension approval popup)
+      if (typeof wallet.api.connect === "function") {
+        connectedAPI = await wallet.api.connect(this.walletState.network);
+      } else if (typeof (wallet.api as any).enable === "function") {
+        connectedAPI = await (wallet.api as any).enable();
+      } else {
+        throw new Error(`Wallet ${wallet.name} does not expose a supported connect() or enable() method.`);
+      }
+
+      if (!connectedAPI) {
+        throw new Error("Connection failed: Wallet returned an empty API instance.");
+      }
+
+      // 1. Retrieve real addresses from the connected wallet
+      let shieldedAddress: string | null = null;
+      let unshieldedAddress: string | null = null;
+      let dustAddress: string | null = null;
+
+      try {
+        if (typeof connectedAPI.getShieldedAddresses === "function") {
+          const sh = await connectedAPI.getShieldedAddresses();
+          if (sh?.shieldedAddress) shieldedAddress = sh.shieldedAddress;
+        }
+      } catch (err) {
+        console.warn("[VeilCircle] getShieldedAddresses error:", err);
+      }
+
+      try {
+        if (typeof connectedAPI.getUnshieldedAddress === "function") {
+          const un = await connectedAPI.getUnshieldedAddress();
+          if (un?.unshieldedAddress) unshieldedAddress = un.unshieldedAddress;
+        }
+      } catch (err) {
+        console.warn("[VeilCircle] getUnshieldedAddress error:", err);
+      }
+
+      try {
+        if (typeof connectedAPI.getDustAddress === "function") {
+          const du = await connectedAPI.getDustAddress();
+          if (du?.dustAddress) dustAddress = du.dustAddress;
+        }
+      } catch (err) {
+        console.warn("[VeilCircle] getDustAddress error:", err);
+      }
+
+      // Legacy state() fallback if specific address methods are absent
+      if (!shieldedAddress && !unshieldedAddress && typeof (connectedAPI as any).state === "function") {
+        try {
+          const st = await (connectedAPI as any).state();
+          shieldedAddress = st?.shieldedAddress || st?.address || null;
+          unshieldedAddress = st?.unshieldedAddress || st?.changeAddress || null;
+        } catch (err) {
+          console.warn("[VeilCircle] state() error:", err);
+        }
+      }
+
+      const activeAddress = shieldedAddress || unshieldedAddress || dustAddress;
+      if (!activeAddress) {
+        throw new Error("Connected to wallet, but unable to retrieve account address. Ensure your wallet has at least one account created.");
+      }
+
+      // 2. Retrieve real balances
+      let dustBalance = 0;
+      let nightBalance = 0;
+
+      try {
+        if (typeof connectedAPI.getDustBalance === "function") {
+          const dustRes = await connectedAPI.getDustBalance();
+          if (dustRes?.balance !== undefined) {
+            dustBalance = Number(dustRes.balance) / 1_000_000;
+          }
+        }
+      } catch (err) {
+        console.warn("[VeilCircle] getDustBalance error:", err);
+      }
+
+      try {
+        if (typeof connectedAPI.getUnshieldedBalances === "function") {
+          const unshieldedMap = await connectedAPI.getUnshieldedBalances();
+          if (unshieldedMap) {
+            for (const val of Object.values(unshieldedMap)) {
+              nightBalance += Number(val) / 1_000_000;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[VeilCircle] getUnshieldedBalances error:", err);
+      }
+
+      // 3. Retrieve service URI configuration from the connected wallet
+      let serviceConfig: Configuration | null = null;
+      try {
+        if (typeof connectedAPI.getConfiguration === "function") {
+          serviceConfig = await connectedAPI.getConfiguration();
+        }
+      } catch (err) {
+        console.warn("[VeilCircle] getConfiguration error:", err);
+      }
+
+      // Store stable rdns in localStorage for session persistence
+      if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+        localStorage.setItem("veilcircle_last_wallet_rdns", wallet.rdns);
+      }
+
+      this.walletState = {
+        isConnected: true,
+        provider: wallet.rdns,
+        providerName: wallet.name,
+        icon: wallet.icon || null,
+        address: activeAddress,
+        shieldedAddress,
+        unshieldedAddress,
+        dustAddress,
+        network: this.walletState.network,
+        balanceDUST: dustBalance,
+        balanceNIGHT: nightBalance,
+        serviceConfig,
+        connectedAPI,
+        isConnecting: false,
+        error: null,
+        isCancelled: false
+      };
+
+      this.notify();
+      return this.walletState;
+    } catch (err: any) {
+      console.error("[VeilCircle] Wallet connect error:", err);
+
+      let errorMessage = "Failed to connect to wallet.";
+      let isCancelled = false;
+
+      // Handle standard DAppConnectorAPIError
+      if (err?.type === "DAppConnectorAPIError" || err?.code) {
+        const code = err.code;
+        if (code === ErrorCodes.Rejected || code === ErrorCodes.PermissionRejected) {
+          errorMessage = "Connection request was cancelled in the wallet popup.";
+          isCancelled = true;
+        } else if (code === ErrorCodes.Disconnected) {
+          errorMessage = "Connection to the wallet was lost. Please reconnect.";
+        } else if (code === ErrorCodes.InternalError) {
+          errorMessage = "Wallet internal error. Please ensure your wallet extension is unlocked and retry.";
+        } else if (code === ErrorCodes.InvalidRequest) {
+          errorMessage = "Invalid connection request.";
+        } else if (err.reason) {
+          errorMessage = err.reason;
+        }
+      } else if (typeof err?.message === "string") {
+        const msg = err.message.toLowerCase();
+        if (msg.includes("reject") || msg.includes("cancel") || msg.includes("denied") || msg.includes("declined") || msg.includes("closed")) {
+          errorMessage = "Connection request was cancelled in the wallet popup.";
+          isCancelled = true;
+        } else if (msg.includes("locked") || msg.includes("unlock")) {
+          errorMessage = "Wallet is locked. Please unlock the extension in your browser and try again.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      this.walletState = {
+        ...this.walletState,
+        isConnected: false,
+        connectedAPI: null,
+        address: null,
+        isConnecting: false,
+        error: errorMessage,
+        isCancelled
+      };
+
+      this.notify();
+      throw new Error(errorMessage);
     }
   }
 
+  /**
+   * Real disconnect flow: clears connected API and state from app.
+   */
   public disconnectWallet(): void {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("veilcircle_connected_wallet");
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      localStorage.removeItem("veilcircle_last_wallet_rdns");
     }
+
     this.walletState = {
       isConnected: false,
-      provider: "sandbox",
-      providerName: "Testnet Sandbox",
+      provider: "",
+      providerName: "",
+      icon: null,
       address: null,
+      shieldedAddress: null,
+      unshieldedAddress: null,
+      dustAddress: null,
       network: this.walletState.network,
       balanceDUST: 0,
       balanceNIGHT: 0,
+      serviceConfig: null,
+      connectedAPI: null,
       isConnecting: false,
-      error: null
+      error: null,
+      isCancelled: false
     };
+
     this.notify();
   }
 
@@ -456,3 +445,4 @@ class MidnightService {
 }
 
 export const midnightService = new MidnightService();
+

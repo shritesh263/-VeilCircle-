@@ -53,14 +53,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const getProviderBadge = () => {
-    switch (walletState.provider) {
-      case "lace":
-        return { icon: "🪢", name: "Lace", color: "bg-primary-fixed text-on-primary-fixed" };
-      case "1am":
-        return { icon: "⚡", name: "1AM", color: "bg-secondary-fixed text-on-secondary-fixed" };
-      default:
-        return { icon: "✨", name: "Sandbox", color: "bg-surface-container text-primary" };
+    if (walletState.providerName) {
+      const is1am = /1am/i.test(walletState.providerName) || /1am/i.test(walletState.provider);
+      const isLace = /lace/i.test(walletState.providerName) || /lace/i.test(walletState.provider);
+      if (is1am) return { icon: "⚡", name: "1AM", color: "bg-secondary-fixed text-on-secondary-fixed" };
+      if (isLace) return { icon: "🪢", name: "Lace", color: "bg-primary-fixed text-on-primary-fixed" };
+      return { icon: "🔒", name: walletState.providerName.split(" ")[0] || "Midnight", color: "bg-primary-fixed text-on-primary-fixed" };
     }
+    return { icon: "🔒", name: "Midnight", color: "bg-primary-fixed text-on-primary-fixed" };
   };
 
   const providerBadge = getProviderBadge();
