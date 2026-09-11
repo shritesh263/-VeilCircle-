@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { Wallet, ShieldCheck, CheckCircle2, Sparkles, ExternalLink, RefreshCw, AlertCircle, Shield, Key, ArrowRight } from "lucide-react";
-import { WalletProviderType } from "../types";
+import React, { useState, useEffect } from "react";
+import { WalletProviderType, WalletProviderInfo } from "../types";
 import { midnightService } from "../services/midnight";
 
 interface LaceWalletModalProps {
@@ -17,10 +16,24 @@ export const LaceWalletModal: React.FC<LaceWalletModalProps> = ({
 }) => {
   const [connectingProvider, setConnectingProvider] = useState<WalletProviderType | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [wallets, setWallets] = useState<WalletProviderInfo[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setErrorMsg(null);
+      setConnectingProvider(null);
+      setWallets(midnightService.getAvailableWallets());
+
+      // Re-scan after short delay in case extension injected asynchronously
+      const timer = setTimeout(() => {
+        setWallets(midnightService.getAvailableWallets());
+      }, 350);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const availableWallets = midnightService.getAvailableWallets();
 
   const handleSelectProvider = async (provider: WalletProviderType) => {
     setErrorMsg(null);
@@ -29,143 +42,165 @@ export const LaceWalletModal: React.FC<LaceWalletModalProps> = ({
       await midnightService.connectWallet(provider);
       onClose();
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to establish connection.");
+      setErrorMsg(err.message || "Failed to establish wallet connection.");
     } finally {
       setConnectingProvider(null);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-lg p-6 sm:p-8 bg-[#0b0e23] border border-indigo-900/80 rounded-3xl shadow-2xl shadow-cyan-500/10 my-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/50 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-lg p-6 sm:p-8 bg-surface-container-lowest border border-surface-container rounded-3xl shadow-2xl shadow-primary/10 my-6">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors"
+          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors"
+          aria-label="Close modal"
         >
-          ✕
+          <span className="material-symbols-outlined text-[18px]">close</span>
         </button>
 
         {/* Modal Header */}
-        <div className="flex items-center space-x-3 mb-5">
-          <div className="p-3 bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-cyan-500/40 rounded-2xl text-cyan-400 shadow-md shadow-cyan-500/10">
-            <Wallet className="w-6 h-6" />
+        <div className="flex items-center gap-3.5 mb-5">
+          <div className="w-12 h-12 rounded-2xl bg-primary-fixed flex items-center justify-center text-primary shadow-xs">
+            <span className="material-symbols-outlined text-[26px]">account_balance_wallet</span>
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 font-mono">
-              Midnight Multi-Wallet Connector
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black text-white">Connect Wallet</h3>
-            <p className="text-xs text-slate-400 font-mono">Target Network: Midnight {network.toUpperCase()}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary font-mono bg-primary-fixed/40 px-2 py-0.5 rounded-full">
+                Midnight CIP-30
+              </span>
+              <span className="text-[10px] font-mono text-secondary bg-secondary-fixed px-2 py-0.5 rounded-full uppercase font-bold">
+                {network}
+              </span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-on-surface mt-1">Connect Shielded Wallet</h3>
+            <p className="text-xs text-on-surface-variant font-medium">Select your Midnight or Cardano privacy provider</p>
           </div>
         </div>
 
+        {/* Error Alert with Quick Sandbox Recovery */}
         {errorMsg && (
-          <div className="p-4 mb-5 rounded-2xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs space-y-2">
-            <div className="flex items-center space-x-2 font-bold">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
-              <span>{errorMsg}</span>
+          <div className="p-4 mb-5 rounded-2xl bg-error-container/70 border border-error/30 text-on-error-container text-xs space-y-2.5 animate-fade-in">
+            <div className="flex items-start gap-2.5">
+              <span className="material-symbols-outlined text-[20px] text-error shrink-0">error</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-on-error-container">Connection Notice</span>
+                <p className="text-[11px] text-on-error-container/90 mt-0.5 leading-relaxed">{errorMsg}</p>
+              </div>
             </div>
-            <div className="pt-2 border-t border-rose-900/40 flex items-center justify-between">
-              <span className="text-[11px] text-slate-300">Want to test without installing an extension?</span>
+            <div className="pt-2 border-t border-error/20 flex flex-col sm:flex-row items-center justify-between gap-2">
+              <span className="text-[11px] text-on-surface-variant font-medium">Test instantly without installing extensions:</span>
               <button
                 onClick={() => handleSelectProvider("sandbox")}
-                className="px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 border border-cyan-500/40 text-[11px] font-bold transition-all flex items-center space-x-1"
+                className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-bold text-xs shadow-xs transition-transform active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
               >
-                <span>Use Sandbox Demo</span>
-                <ArrowRight className="w-3 h-3" />
+                <span className="material-symbols-outlined text-[16px]">bolt</span>
+                <span>Launch Sandbox</span>
               </button>
             </div>
           </div>
         )}
 
-        <p className="text-xs sm:text-sm text-slate-300 mb-6 leading-relaxed">
-          Select your preferred Midnight wallet to interact with zero-knowledge circuits and balance transaction fees without leaking identity.
+        <p className="text-xs text-on-surface-variant mb-5 leading-relaxed">
+          VeilCircle interacts with zero-knowledge circuits and relays proofs gaslessly. Select a wallet below to authenticate:
         </p>
 
         {/* Provider Cards */}
         <div className="space-y-3">
-          {availableWallets.map((wallet) => (
-            <div
-              key={wallet.id}
-              className={`p-4 rounded-2xl border transition-all ${
-                wallet.isInstalled
-                  ? "border-cyan-500/40 bg-cyan-950/15 hover:bg-cyan-900/25 hover:border-cyan-500"
-                  : "border-indigo-950 bg-[#060814]/80 hover:border-indigo-900"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start space-x-3.5">
-                  <div className="w-11 h-11 rounded-xl bg-indigo-950/80 border border-indigo-900 flex items-center justify-center text-xl flex-shrink-0">
-                    {wallet.icon}
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h4 className="font-bold text-sm text-white">{wallet.name}</h4>
-                      {wallet.isInstalled ? (
-                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                          Ready
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                          Not Detected
-                        </span>
-                      )}
+          {wallets.map((wallet) => {
+            const isConnecting = connectingProvider === wallet.id;
+            return (
+              <div
+                key={wallet.id}
+                className={`p-4 rounded-2xl border transition-all ${
+                  wallet.isInstalled
+                    ? "border-primary/40 bg-surface-container-low hover:bg-surface-container hover:border-primary shadow-xs"
+                    : "border-surface-container bg-surface-container-lowest hover:bg-surface-container-low"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-11 h-11 rounded-2xl bg-surface-container-lowest border border-surface-container flex items-center justify-center text-2xl shadow-xs shrink-0">
+                      {wallet.icon}
                     </div>
-                    <p className="text-xs text-slate-400 mt-1 leading-normal">{wallet.description}</p>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-bold text-sm text-on-surface truncate">{wallet.name}</h4>
+                        {wallet.isInstalled ? (
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant">
+                            Detected
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+                            Not Installed
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-on-surface-variant mt-0.5 leading-normal line-clamp-1">
+                        {wallet.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Action button */}
-                <div className="flex-shrink-0">
-                  {wallet.isInstalled ? (
-                    <button
-                      onClick={() => handleSelectProvider(wallet.id)}
-                      disabled={connectingProvider === wallet.id}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-md shadow-cyan-500/20 transition-all flex items-center space-x-1.5 disabled:opacity-50"
-                    >
-                      {connectingProvider === wallet.id ? (
-                        <>
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          <span>Connecting...</span>
-                        </>
-                      ) : (
-                        <span>Connect</span>
-                      )}
-                    </button>
-                  ) : (
-                    <div className="flex items-center space-x-1.5">
+                  {/* Action button */}
+                  <div className="shrink-0">
+                    {wallet.isInstalled ? (
                       <button
                         onClick={() => handleSelectProvider(wallet.id)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 transition-colors"
+                        disabled={isConnecting}
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-container shadow-xs transition-all flex items-center gap-1.5 disabled:opacity-50 active:scale-95"
                       >
-                        Try Connect
+                        {isConnecting ? (
+                          <>
+                            <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                            <span>Connecting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Connect</span>
+                            <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                          </>
+                        )}
                       </button>
-                      <a
-                        href={wallet.websiteUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-1.5 text-slate-400 hover:text-cyan-300 transition-colors"
-                        title={`Install ${wallet.name}`}
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleSelectProvider(wallet.id)}
+                          className="px-3 py-1.5 rounded-xl text-xs font-bold text-on-surface bg-surface-container hover:bg-surface-container-high transition-colors"
+                        >
+                          Try
+                        </button>
+                        <a
+                          href={wallet.websiteUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-secondary transition-colors"
+                          title={`Install ${wallet.name}`}
+                        >
+                          <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Security & Privacy Badge */}
-        <div className="mt-6 pt-4 border-t border-indigo-950 flex items-center justify-between text-xs text-slate-400 font-mono">
-          <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span>Zero witness data is ever exposed to wallet extensions.</span>
+        <div className="mt-6 pt-4 border-t border-surface-container flex items-center justify-between text-xs text-on-surface-variant font-mono">
+          <div className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+              verified_user
+            </span>
+            <span>Zero private witness data is ever shared with extensions.</span>
           </div>
-          <span className="text-[10px] text-cyan-400">Midnight CIP-30</span>
+          <span className="text-[10px] text-primary font-bold">Midnight Enclave</span>
         </div>
       </div>
     </div>
   );
 };
+

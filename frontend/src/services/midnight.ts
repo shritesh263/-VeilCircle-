@@ -31,13 +31,16 @@ function findConnector(provider: "lace" | "1am"): any | null {
     const candidates = [
       win.midnight?.mnLace,
       win.midnight?.lace,
-      win.cardano?.lace,
+      win.midnight?.Lace,
       win.cardano?.mnLace,
+      win.cardano?.lace,
+      win.cardano?.Lace,
+      win.midnightLace,
       win.lace
     ];
 
     for (const c of candidates) {
-      if (c && (typeof c.enable === "function" || typeof c.state === "function" || typeof c.getAddress === "function" || typeof c.getChangeAddress === "function")) {
+      if (c && (typeof c.enable === "function" || typeof c.isEnabled === "function" || typeof c.state === "function" || typeof c.getAddress === "function" || typeof c.getChangeAddress === "function")) {
         return c;
       }
     }
@@ -47,16 +50,21 @@ function findConnector(provider: "lace" | "1am"): any | null {
   if (provider === "1am") {
     const candidates = [
       win.midnight?.["1am"],
-      win.midnight?.oneam,
       win.midnight?.["1AM"],
+      win.midnight?.oneam,
+      win.midnight?.oneAm,
       win.cardano?.["1am"],
+      win.cardano?.["1AM"],
       win.cardano?.oneam,
+      win.cardano?.oneAm,
       win.oneam,
-      win["1am"]
+      win.oneAm,
+      win["1am"],
+      win["1AM"]
     ];
 
     for (const c of candidates) {
-      if (c && (typeof c.enable === "function" || typeof c.state === "function" || typeof c.getAddress === "function" || typeof c.getChangeAddress === "function")) {
+      if (c && (typeof c.enable === "function" || typeof c.isEnabled === "function" || typeof c.state === "function" || typeof c.getAddress === "function" || typeof c.getChangeAddress === "function")) {
         return c;
       }
     }
@@ -65,6 +73,7 @@ function findConnector(provider: "lace" | "1am"): any | null {
 
   return null;
 }
+
 
 class MidnightService {
   private walletState: LaceWalletState = {
