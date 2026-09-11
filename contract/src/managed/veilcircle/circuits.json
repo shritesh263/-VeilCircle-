@@ -2,7 +2,7 @@
   "contractName": "VeilCircle",
   "language": "Compact",
   "languageVersion": "0.19.0",
-  "compiledAt": "2026-09-09T15:51:30.841Z",
+  "compiledAt": "2026-09-11T12:27:51.349Z",
   "circuits": [
     {
       "name": "createCircle",
