@@ -28,8 +28,13 @@ function findConnector(provider: "lace" | "1am"): any | null {
   const win = window as any;
 
   if (provider === "1am") {
-    // 1. Dynamic regex search on window.midnight
+    // 1. Check window.midnight root if it's the 1AM provider
     if (win.midnight && typeof win.midnight === "object") {
+      if (typeof win.midnight.connect === "function" || typeof win.midnight.enable === "function" || win.midnight.name === "1AM" || win.midnight.name === "1am") {
+        return win.midnight;
+      }
+
+      // Check window.midnight sub-keys dynamically
       for (const key of Object.keys(win.midnight)) {
         if (/1am|oneam|one-am/i.test(key)) {
           const c = win.midnight[key];
@@ -38,8 +43,14 @@ function findConnector(provider: "lace" | "1am"): any | null {
       }
     }
 
-    // 2. Dynamic regex search on window.cardano
+    // 2. Check window.cardano keys
     if (win.cardano && typeof win.cardano === "object") {
+      if (win.cardano.midnight && typeof win.cardano.midnight === "object") {
+        if (/1am/i.test(win.cardano.midnight.name || "") || typeof win.cardano.midnight.connect === "function" || typeof win.cardano.midnight.enable === "function") {
+          return win.cardano.midnight;
+        }
+      }
+
       for (const key of Object.keys(win.cardano)) {
         if (/1am|oneam|one-am/i.test(key)) {
           const c = win.cardano[key];
@@ -60,7 +71,14 @@ function findConnector(provider: "lace" | "1am"): any | null {
     ];
 
     for (const c of directCandidates) {
-      if (c) return c;
+      if (c && (typeof c.connect === "function" || typeof c.enable === "function" || typeof c.isEnabled === "function" || typeof c.state === "function" || typeof c.getAddress === "function")) {
+        return c;
+      }
+    }
+
+    // Fallback: If window.midnight exists as an object, return it
+    if (win.midnight && typeof win.midnight === "object") {
+      return win.midnight;
     }
 
     return null;
@@ -69,6 +87,9 @@ function findConnector(provider: "lace" | "1am"): any | null {
   if (provider === "lace") {
     // 1. Dynamic regex search on window.midnight
     if (win.midnight && typeof win.midnight === "object") {
+      if (win.midnight.mnLace || win.midnight.lace) {
+        return win.midnight.mnLace || win.midnight.lace;
+      }
       for (const key of Object.keys(win.midnight)) {
         if (/lace|mnlace/i.test(key)) {
           const c = win.midnight[key];
@@ -79,6 +100,9 @@ function findConnector(provider: "lace" | "1am"): any | null {
 
     // 2. Dynamic regex search on window.cardano
     if (win.cardano && typeof win.cardano === "object") {
+      if (win.cardano.lace || win.cardano.mnLace) {
+        return win.cardano.lace || win.cardano.mnLace;
+      }
       for (const key of Object.keys(win.cardano)) {
         if (/lace|mnlace/i.test(key)) {
           const c = win.cardano[key];
@@ -91,9 +115,7 @@ function findConnector(provider: "lace" | "1am"): any | null {
     const directCandidates = [
       win.midnightLace,
       win.mnLace,
-      win.lace,
-      win.midnight?.mnLace,
-      win.midnight?.lace
+      win.lace
     ];
 
     for (const c of directCandidates) {
@@ -161,7 +183,7 @@ class MidnightService {
       {
         id: "1am",
         name: "1AM Midnight Wallet",
-        description: "Privacy-first Midnight & Cardano ecosystem wallet with native shielded token support.",
+        description: "Official privacy wallet purpose-built for Midnight network shielded tokens & ZK signing.",
         icon: "⚡",
         websiteUrl: "https://1am.xyz",
         isInstalled: Boolean(oneAmConnector)
@@ -200,23 +222,53 @@ class MidnightService {
       if (provider === "1am" || provider === "lace") {
         let connector = findConnector(provider);
 
-        // If not found right away, wait briefly (200ms) for extension injection and try once more
+        // If not found right away, wait briefly (250ms) for extension injection and try once more
         if (!connector) {
-          await new Promise((r) => setTimeout(r, 200));
+          await new Promise((r) => setTimeout(r, 250));
           connector = findConnector(provider);
         }
 
         let resolvedAddress: string | null = null;
         let isRealExtension = false;
+        let resolvedDustBalance: number = provider === "1am" ? 980.25 : 1420.5;
+        let resolvedNightBalance: number = provider === "1am" ? 45.0 : 60.0;
 
-        // If real browser extension is present, invoke CIP-30 enable()
+        // If real browser extension is present, invoke Midnight DApp Connector API or CIP-30
         if (connector) {
           try {
-            let api: any = connector;
-            if (typeof connector.enable === "function") {
-              api = await connector.enable();
-            } else if (typeof connector === "function") {
-              api = await connector();
+            let api: any = null;
+
+            // Method 1: connector.connect(network) - standard Midnight dApp connector API
+            if (typeof connector.connect === "function") {
+              try {
+                api = await connector.connect(this.walletState.network);
+              } catch (connErr1) {
+                console.warn("connector.connect(network) failed, trying enable():", connErr1);
+              }
+            }
+
+            // Method 2: connector.enable() - CIP-30 / Cardano / Midnight
+            if (!api && typeof connector.enable === "function") {
+              try {
+                api = await connector.enable();
+              } catch (connErr2: any) {
+                if (connErr2?.message?.includes("reject") || connErr2?.message?.includes("denied") || connErr2?.message?.includes("cancel")) {
+                  throw new Error(`Connection request was declined in ${provider === "1am" ? "1AM" : "Lace"} wallet.`);
+                }
+                throw connErr2;
+              }
+            }
+
+            // Method 3: connector as function
+            if (!api && typeof connector === "function") {
+              try {
+                api = await connector();
+              } catch (e) {}
+            }
+
+            // Method 4: connector is already the active API
+            if (!api && (typeof connector.state === "function" || typeof connector.getAddress === "function" || typeof connector.getChangeAddress === "function")) {
+              api = connector;
             }
 
             if (api) {
@@ -226,7 +278,9 @@ class MidnightService {
               if (typeof api.state === "function") {
                 try {
                   const st = await api.state();
-                  resolvedAddress = st?.address || st?.changeAddress || st?.activeAddress || st?.shieldedAddress || null;
+                  resolvedAddress = st?.address || st?.shieldedAddress || st?.changeAddress || st?.activeAddress || null;
+                  if (typeof st?.dust === "number") resolvedDustBalance = st.dust;
+                  if (typeof st?.night === "number") resolvedNightBalance = st.night;
                 } catch (e) {}
               }
 
@@ -260,12 +314,20 @@ class MidnightService {
               if (!resolvedAddress && typeof api.address === "string") {
                 resolvedAddress = api.address;
               }
+
+              // 6. Try balances
+              if (typeof api.getShieldedBalances === "function") {
+                try {
+                  const bal = await api.getShieldedBalances();
+                  if (bal?.dust) resolvedDustBalance = Number(bal.dust);
+                  if (bal?.night) resolvedNightBalance = Number(bal.night);
+                } catch (e) {}
+              }
             }
           } catch (connErr: any) {
-            console.warn(`Real extension enable rejected for ${provider}:`, connErr);
-            // If user explicitly rejected in popup, report clean error, or allow fallback
-            if (connErr?.message?.includes("reject") || connErr?.message?.includes("denied") || connErr?.message?.includes("cancel")) {
-              throw new Error(`Connection was declined in ${provider === "1am" ? "1AM" : "Lace"} wallet.`);
+            console.warn(`Extension connection failed for ${provider}:`, connErr);
+            if (connErr?.message?.includes("declined") || connErr?.message?.includes("reject") || connErr?.message?.includes("denied")) {
+              throw connErr;
             }
           }
         }
@@ -279,8 +341,8 @@ class MidnightService {
 
         const providerLabel =
           provider === "1am"
-            ? isRealExtension ? "1AM Midnight Wallet (Live)" : "1AM Midnight Wallet"
-            : isRealExtension ? "Midnight Lace Wallet (Live)" : "Midnight Lace Wallet";
+            ? isRealExtension ? "1AM Midnight Wallet (Live Extension)" : "1AM Midnight Wallet"
+            : isRealExtension ? "Midnight Lace Wallet (Live Extension)" : "Midnight Lace Wallet";
 
         this.walletState = {
           isConnected: true,
@@ -288,8 +350,8 @@ class MidnightService {
           providerName: providerLabel,
           address: finalAddress,
           network: this.walletState.network,
-          balanceDUST: provider === "1am" ? 980.25 : 1420.5,
-          balanceNIGHT: provider === "1am" ? 45.0 : 60.0,
+          balanceDUST: resolvedDustBalance,
+          balanceNIGHT: resolvedNightBalance,
           isConnecting: false,
           error: null
         };
@@ -300,6 +362,7 @@ class MidnightService {
         this.notify();
         return this.walletState;
       }
+
 
       // Sandbox Mode (Instant developer testnet)
       await new Promise((r) => setTimeout(r, 250));
