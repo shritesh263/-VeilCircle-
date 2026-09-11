@@ -196,19 +196,40 @@ class MidnightService {
     }
 
     try {
-      let connectedAPI: ConnectedAPI;
+      let connectedAPI: ConnectedAPI | null = null;
+      let lastConnectError: any = null;
 
-      // Call the real authorization method (triggers the browser extension approval popup)
+      // 1. Adaptive connection strategy:
+      // Try connect(network) -> fallback connect() -> fallback enable()
       if (typeof wallet.api.connect === "function") {
-        connectedAPI = await wallet.api.connect(this.walletState.network);
-      } else if (typeof (wallet.api as any).enable === "function") {
-        connectedAPI = await (wallet.api as any).enable();
-      } else {
-        throw new Error(`Wallet ${wallet.name} does not expose a supported connect() or enable() method.`);
+        try {
+          connectedAPI = await wallet.api.connect(this.walletState.network);
+        } catch (connErr: any) {
+          console.warn("[VeilCircle] connect(network) failed, attempting connect() with no args:", connErr);
+          lastConnectError = connErr;
+          try {
+            connectedAPI = await (wallet.api.connect as any)();
+          } catch (noArgErr: any) {
+            console.warn("[VeilCircle] connect() with no args failed:", noArgErr);
+            lastConnectError = noArgErr;
+          }
+        }
+      }
+
+      if (!connectedAPI && typeof (wallet.api as any).enable === "function") {
+        try {
+          connectedAPI = await (wallet.api as any).enable();
+        } catch (enableErr: any) {
+          console.warn("[VeilCircle] enable() failed:", enableErr);
+          lastConnectError = enableErr;
+        }
       }
 
       if (!connectedAPI) {
-        throw new Error("Connection failed: Wallet returned an empty API instance.");
+        if (lastConnectError) {
+          throw lastConnectError;
+        }
+        throw new Error(`Wallet ${wallet.name} did not return a valid API instance.`);
       }
 
       // 1. Retrieve real addresses from the connected wallet
@@ -256,7 +277,7 @@ class MidnightService {
 
       const activeAddress = shieldedAddress || unshieldedAddress || dustAddress;
       if (!activeAddress) {
-        throw new Error("Connected to wallet, but unable to retrieve account address. Ensure your wallet has at least one account created.");
+        throw new Error("Connected to wallet, but unable to retrieve account address. Please unlock your wallet and verify at least one account is created.");
       }
 
       // 2. Retrieve real balances
@@ -338,9 +359,9 @@ class MidnightService {
         } else if (code === ErrorCodes.Disconnected) {
           errorMessage = "Connection to the wallet was lost. Please reconnect.";
         } else if (code === ErrorCodes.InternalError) {
-          errorMessage = "Wallet internal error. Please ensure your wallet extension is unlocked and retry.";
+          errorMessage = "Wallet extension returned an internal error. Please click the wallet extension in your browser toolbar, unlock it with your password, and try connecting again.";
         } else if (code === ErrorCodes.InvalidRequest) {
-          errorMessage = "Invalid connection request.";
+          errorMessage = "Invalid connection request. Please ensure your wallet extension is up-to-date and unlocked.";
         } else if (err.reason) {
           errorMessage = err.reason;
         }
@@ -350,7 +371,7 @@ class MidnightService {
           errorMessage = "Connection request was cancelled in the wallet popup.";
           isCancelled = true;
         } else if (msg.includes("locked") || msg.includes("unlock")) {
-          errorMessage = "Wallet is locked. Please unlock the extension in your browser and try again.";
+          errorMessage = "Wallet is locked. Please click your wallet extension icon in your browser toolbar, enter your password to unlock, and try again.";
         } else {
           errorMessage = err.message;
         }

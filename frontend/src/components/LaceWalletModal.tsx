@@ -103,12 +103,18 @@ export const LaceWalletModal: React.FC<LaceWalletModalProps> = ({
 
         {/* Error Alert */}
         {errorMsg && !isCancelled && (
-          <div className="p-4 mb-5 rounded-2xl bg-error-container/80 border border-error/30 text-on-error-container text-xs space-y-1.5 animate-fade-in">
+          <div className="p-4 mb-5 rounded-2xl bg-error-container/80 border border-error/30 text-on-error-container text-xs space-y-2 animate-fade-in">
             <div className="flex items-start gap-2.5">
-              <span className="material-symbols-outlined text-[20px] text-error shrink-0">error</span>
+              <span className="material-symbols-outlined text-[20px] text-error shrink-0 mt-0.5">error</span>
               <div className="flex flex-col">
-                <span className="font-bold">Connection Error</span>
+                <span className="font-bold text-xs">Connection Error</span>
                 <p className="text-[11px] text-on-error-container/90 mt-0.5 leading-relaxed">{errorMsg}</p>
+                <div className="mt-2 p-2 rounded-xl bg-surface-container-lowest/60 border border-error/20 text-[10.5px] text-on-surface space-y-1">
+                  <span className="font-bold block text-primary">Troubleshooting Steps:</span>
+                  <div>1. Click your <strong>1AM</strong> or <strong>Lace</strong> icon in your browser toolbar.</div>
+                  <div>2. Enter your password to unlock the wallet.</div>
+                  <div>3. Click <strong>Connect</strong> below to approve access.</div>
+                </div>
               </div>
             </div>
           </div>
