@@ -1,17 +1,19 @@
 export interface Circle {
   id: string; // Hex string (32 bytes)
   title: string;
-  category: "Mental Health" | "Addiction Recovery" | "Chronic & Rare Illness" | "Trauma & Abuse" | "Caregivers & Whistleblowers";
+  category: "Caregiver Support" | "Burnout & Recovery" | "Chronic Health" | "Verified Referrals" | "Trauma & Abuse" | "Mental Health" | "Addiction Recovery";
   description: string;
   eligibilityCriteria: string;
   issuerName: string;
   issuerPubKey: string;
   memberCount: number;
+  cohort: string;
+  scheduleBadge: string;
+  iconName: string;
+  tags: string[];
   isActive: boolean;
   contractAddress: string;
   badgeColor: string;
-  iconName: string;
-  tags: string[];
 }
 
 export interface PrivateCredential {
@@ -25,11 +27,13 @@ export interface PrivateCredential {
   commitmentHex: string; // On-chain public commitment hash
   issuedAt: string;
   category: string;
+  predicateText: string;
   rawDetails: {
     holderAlias?: string;
     clinicalReferenceCode?: string;
     conditionCode?: string;
     validityWindow?: string;
+    blindedHashMask?: string;
   };
 }
 
@@ -45,16 +49,27 @@ export interface ZkProofDetails {
   proofGenerationTimeMs: number;
   circuitConstraintsVerified: number;
   witnessBlinded: boolean;
+  nullifierHash: string;
+  contractFile: string;
+  validatorNode: string;
+  gasSponsored: boolean;
+  ephemeralGuardianId: string;
 }
 
-export interface AnonymousMessage {
+export interface PeerMessage {
   id: string;
   circleId: string;
-  ephemeralSenderId: string; // Short hash derived from nullifier (e.g. "Member #48B2")
+  senderAlias: string;
+  senderAvatarEmoji: string;
+  badgeText: string;
   content: string;
   timestamp: string;
-  verifiedShield: boolean;
-  zkProofSnippet: string;
+  isSelf: boolean;
+  reactions: {
+    heart: number;
+    warmth: number;
+    presence: number;
+  };
 }
 
 export interface NetworkConfig {
@@ -88,3 +103,15 @@ export interface LaceWalletState {
   isConnecting: boolean;
   error: string | null;
 }
+
+export interface AnonymousMessage {
+  id: string;
+  circleId: string;
+  ephemeralSenderId: string;
+  content: string;
+  timestamp: string;
+  verifiedShield: boolean;
+  zkProofSnippet: string;
+}
+
+

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Search, Filter, Plus, ShieldCheck, Sparkles } from "lucide-react";
 import { Circle } from "../types";
 import { CircleCard } from "./CircleCard";
 
@@ -9,6 +8,7 @@ interface CircleExplorerProps {
   onJoinClick: (circle: Circle) => void;
   onEnterRoomClick: (circle: Circle) => void;
   onCreateCircleModalOpen: () => void;
+  verifiableCount?: number;
 }
 
 export const CircleExplorer: React.FC<CircleExplorerProps> = ({
@@ -16,111 +16,122 @@ export const CircleExplorer: React.FC<CircleExplorerProps> = ({
   joinedCircleIds,
   onJoinClick,
   onEnterRoomClick,
-  onCreateCircleModalOpen
+  onCreateCircleModalOpen,
+  verifiableCount = 3
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  const categories = [
-    "All",
-    "Trauma & Abuse",
-    "Addiction Recovery",
-    "Chronic & Rare Illness",
-    "Mental Health",
-    "Caregivers & Whistleblowers"
+  const filterCategories = [
+    { id: "all", label: "All Circles", icon: "all_inclusive" },
+    { id: "caregiver", label: "Caregiver Support", icon: "volunteer_activism" },
+    { id: "burnout", label: "Burnout & Recovery", icon: "self_improvement" },
+    { id: "chronic", label: "Chronic Health", icon: "vital_signs" },
+    { id: "referrals", label: "Verified Referrals", icon: "verified" }
   ];
 
-  const filteredCircles = circles.filter((c) => {
-    const matchesCategory = selectedCategory === "All" || c.category === selectedCategory;
+  const filteredCircles = circles.filter((circle) => {
+    const matchesCategory =
+      activeFilter === "all" ||
+      circle.tags.some((t) => t.toLowerCase() === activeFilter.toLowerCase()) ||
+      circle.category.toLowerCase().includes(activeFilter.toLowerCase());
+
     const matchesSearch =
-      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+      circle.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      circle.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      circle.eligibilityCriteria.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      circle.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+
     return matchesCategory && matchesSearch;
   });
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-[#0b0e23] to-[#060814] border border-cyan-500/20 p-8 sm:p-10">
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-1/3 -mb-16 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 max-w-3xl">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Zero-Knowledge Proofs on Midnight Blockchain</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-4">
-            Prove you belong in a support group —{" "}
-            <span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-              without ever revealing who you are.
+    <div className="flex flex-col w-full gap-6 animate-fade-in">
+      {/* Privacy Assurance Clearing Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-surface-container-low shadow-[0_8px_30px_rgba(0,105,72,0.04)] p-5 sm:p-6 border border-surface-container">
+        <div className="absolute -right-6 -bottom-6 w-36 h-36 rounded-full bg-primary-fixed/30 blur-2xl pointer-events-none"></div>
+        <div className="flex items-start gap-4 relative z-10">
+          <div className="w-11 h-11 rounded-xl bg-surface-container-lowest flex items-center justify-center text-primary shadow-xs shrink-0">
+            <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              shield_with_heart
             </span>
-          </h1>
-          <p className="text-base text-slate-300 leading-relaxed mb-6">
-            Sensitive recovery &amp; condition peer groups require trust, not surveillance. VeilCircle uses Midnight's Compact contracts to cryptographically verify your eligibility credential locally on your device. The smart contract, group operator, and on-chain observers never learn your identity or medical diagnosis.
-          </p>
-
-          <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-300">
-            <div className="flex items-center space-x-2 bg-[#060814]/80 px-3 py-1.5 rounded-lg border border-indigo-900/60">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Zero Identity Storage</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary font-mono">
+                ZK Enclave Active • Zero Footprint
+              </span>
             </div>
-            <div className="flex items-center space-x-2 bg-[#060814]/80 px-3 py-1.5 rounded-lg border border-indigo-900/60">
-              <ShieldCheck className="w-4 h-4 text-cyan-400" />
-              <span>Unlinkable Circle Nullifiers</span>
-            </div>
-            <div className="flex items-center space-x-2 bg-[#060814]/80 px-3 py-1.5 rounded-lg border border-indigo-900/60">
-              <ShieldCheck className="w-4 h-4 text-purple-400" />
-              <span>Client-Side Witness Only</span>
-            </div>
+            <p className="text-xs sm:text-sm text-on-surface leading-snug">
+              Your identity never leaves this device. Peer circles are protected by{" "}
+              <span className="font-bold text-primary">Midnight Compact</span> smart contracts and client-side nullifiers.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        {/* Search */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search support circles by condition, keyword, or tag..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#0b0e23] text-sm text-slate-100 placeholder-slate-400 pl-10 pr-4 py-3 rounded-xl border border-indigo-900/60 focus:outline-none focus:border-cyan-500 transition-colors"
-          />
+      {/* Interactive Search & Filter Clearing */}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+          {/* Search Field */}
+          <div className="relative w-full sm:flex-1">
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">
+              search
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search safe spaces, clinical criteria, or tags..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline text-xs sm:text-sm shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-surface-container focus:outline-none focus:border-primary transition-all"
+            />
+          </div>
+
+          {/* Create Circle Button */}
+          <button
+            onClick={onCreateCircleModalOpen}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-primary font-bold text-xs border border-surface-container shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>Create Safe Circle</span>
+          </button>
         </div>
 
-        {/* Create Circle Button */}
-        <button
-          onClick={onCreateCircleModalOpen}
-          className="px-4 py-3 rounded-xl text-sm font-bold bg-[#0b0e23] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-950/30 transition-all flex items-center justify-center space-x-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Create New Circle</span>
-        </button>
+        {/* Filter Pills Horizontal Scroll */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {filterCategories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveFilter(cat.id)}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all duration-200 ${
+                activeFilter === cat.id
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "bg-surface-container-lowest text-on-surface-variant hover:text-primary border border-surface-container shadow-xs"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">{cat.icon}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Category Pills */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-              selectedCategory === cat
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm"
-                : "bg-[#0b0e23] text-slate-400 border border-indigo-950 hover:text-slate-200 hover:border-indigo-900"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+      {/* Realtime Eligibility Summary Bar */}
+      <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-surface-container shadow-xs border border-surface-container-high/40">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary text-[20px]">key_vertical</span>
+          <span className="text-xs font-semibold text-on-surface">
+            {verifiableCount} proofs verifiable in local wallet
+          </span>
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary font-mono">
+          Sync: 12s ago
+        </span>
       </div>
 
-      {/* Circle Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Peer Circles Directory Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {filteredCircles.map((circle) => (
           <CircleCard
             key={circle.id}

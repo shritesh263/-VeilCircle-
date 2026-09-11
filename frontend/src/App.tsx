@@ -2,102 +2,93 @@ import React, { useState, useEffect } from "react";
 import { Navbar } from "./components/Navbar";
 import { CircleExplorer } from "./components/CircleExplorer";
 import { CredentialVault } from "./components/CredentialVault";
-import { PrivacyInspector } from "./components/PrivacyInspector";
+import { ZkProofStudio } from "./components/ZkProofStudio";
+import { ProofSettlement } from "./components/ProofSettlement";
+import { PeerSanctuary } from "./components/PeerSanctuary";
+import { ConnectedWalletAccount } from "./components/ConnectedWalletAccount";
 import { LedgerExplorer } from "./components/LedgerExplorer";
-import { AnonymousRoom } from "./components/AnonymousRoom";
 import { LaceWalletModal } from "./components/LaceWalletModal";
-import { ZkJoinModal } from "./components/ZkJoinModal";
 import { CreateCircleModal } from "./components/CreateCircleModal";
-import { Circle, PrivateCredential, LaceWalletState } from "./types";
-import { DEFAULT_CIRCLES, DEMO_CREDENTIAL_TEMPLATES } from "./services/mockData";
+import { Circle, PrivateCredential, LaceWalletState, ZkProofDetails } from "./types";
+import { DEFAULT_CIRCLES, INITIAL_CREDENTIALS } from "./services/mockData";
 import { midnightService } from "./services/midnight";
-import { Shield, Lock, EyeOff, Github, Heart, ExternalLink, Activity } from "lucide-react";
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("explore");
   const [circles, setCircles] = useState<Circle[]>(DEFAULT_CIRCLES);
-  const [joinedCircleIds, setJoinedCircleIds] = useState<Set<string>>(new Set());
-  const [activeRoomCircle, setActiveRoomCircle] = useState<Circle | null>(null);
-
-  // Seed with 2 demo private credentials so user can test ZK circuits immediately
-  const [credentials, setCredentials] = useState<PrivateCredential[]>([
-    {
-      id: "cred_va_demo",
-      title: "Veterans Clinical Intake Attestation",
-      issuerName: "Veterans Health Administration",
-      issuerPubKey: "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
-      secretKeyHex: "8f29c4ba03e9112a9bc490d347890ef9923841cd2789123490abbacde0912384",
-      attributeHex: "12a9bc490d347890ef9923841cd278918f29c4ba03e9123490abbacde0912384",
-      saltHex: "5c4d2c83f260429fb2614048fd0067f4a1b2c3d4e5f60718293a4b5c6d7e8f90",
-      commitmentHex: "0xe7f9201bc490d347890ef9923841cd2789123490abbacde09123841029384719",
-      issuedAt: new Date().toISOString(),
-      category: "Trauma & Abuse",
-      rawDetails: {
-        holderAlias: "Demo Veteran 01",
-        conditionCode: "ICD-10-F43.10 (PTSD Intake)",
-        clinicalReferenceCode: "VA-CLINIC-9821-X",
-        validityWindow: "2026-2028"
-      }
+  const [credentials, setCredentials] = useState<PrivateCredential[]>(INITIAL_CREDENTIALS);
+  const [joinedCircleIds, setJoinedCircleIds] = useState<Set<string>>(new Set([DEFAULT_CIRCLES[0].id]));
+  const [activeSanctuaryCircle, setActiveSanctuaryCircle] = useState<Circle>(DEFAULT_CIRCLES[0]);
+  const [targetProverCircle, setTargetProverCircle] = useState<Circle>(DEFAULT_CIRCLES[0]);
+  const [latestProofDetails, setLatestProofDetails] = useState<ZkProofDetails | null>({
+    circuitName: "proveAndJoinCircle",
+    pi_a: ["0x8f29c4ba03e9112a", "0x9bc490d347890ef9"],
+    pi_b: [["0x8f29c4ba03e9112a", "0x9bc490d347890ef9"], ["0x12a9bc490d347890", "0xef9923841cd27891"]],
+    pi_c: ["0x12a9bc490d347890", "0x8f29c4ba03e9112a"],
+    publicInputs: {
+      circleId: DEFAULT_CIRCLES[0].id,
+      nullifier: "0x4e7a91bc8f29c4ba"
     },
+    proofGenerationTimeMs: 914,
+    circuitConstraintsVerified: 1248,
+    witnessBlinded: true,
+    nullifierHash: "0x4e7a...91bc",
+    contractFile: "veil_circle_v2.compact",
+    validatorNode: "Midnight Node #12",
+    gasSponsored: true,
+    ephemeralGuardianId: "Veil Guardian #419"
+  });
+
+  const [spentNullifiers, setSpentNullifiers] = useState<any[]>([
     {
-      id: "cred_samhsa_demo",
-      title: "Clinical Recovery Pass & Sobriety Proof",
-      issuerName: "SAMHSA Clinical Network",
-      issuerPubKey: "0xb2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
-      secretKeyHex: "709a08320efa8334cde5f532be8cab48a571fbf388bc6f6903f748d43391c5e9",
-      attributeHex: "4b78912e89fa3001bcde91238410293847192837491029384719283749182374",
-      saltHex: "1029384756102938475610293847561029384756102938475610293847561029",
-      commitmentHex: "0x3f10928374829103948571928374910293847192837491823749182374918237",
-      issuedAt: new Date().toISOString(),
-      category: "Addiction Recovery",
-      rawDetails: {
-        holderAlias: "Demo Sobriety Member",
-        conditionCode: "DSM-5-SUD-RECOVERY-ACTIVE",
-        clinicalReferenceCode: "RECOV-PASS-5541-A",
-        validityWindow: "2026-2027"
-      }
+      nullifier: "0x4e7a91bc8f29c4ba03e9112a9bc490d347890ef9923841cd2789123490abbacd",
+      circleId: DEFAULT_CIRCLES[0].id,
+      txHash: "0x8f29c4ba03e9112a9bc490d347890ef9923841cd2789123490abbacde0912384",
+      timestamp: "12m ago"
     }
   ]);
 
-  const [spentNullifiers, setSpentNullifiers] = useState<any[]>([]);
   const [walletState, setWalletState] = useState<LaceWalletState>(midnightService.getWalletState());
-
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
-  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedCircleForJoin, setSelectedCircleForJoin] = useState<Circle | null>(null);
 
   useEffect(() => {
     const unsub = midnightService.subscribe(setWalletState);
     return () => unsub();
   }, []);
 
-  const handleOpenJoinModal = (circle: Circle) => {
-    setSelectedCircleForJoin(circle);
-    setIsJoinModalOpen(true);
+  const handleJoinClick = (circle: Circle) => {
+    setTargetProverCircle(circle);
+    setActiveTab("studio");
   };
 
   const handleEnterRoom = (circle: Circle) => {
-    setActiveRoomCircle(circle);
-    setActiveTab("room");
+    setActiveSanctuaryCircle(circle);
+    setActiveTab("sanctuary");
   };
 
-  const handleJoinSuccess = (circleId: string, proofData: any) => {
-    setJoinedCircleIds((prev) => new Set([...prev, circleId]));
+  const handleProofGenerated = (circle: Circle, cred: PrivateCredential, proofDetails: ZkProofDetails) => {
+    setLatestProofDetails(proofDetails);
+    setActiveSanctuaryCircle(circle);
+    setJoinedCircleIds((prev) => new Set([...prev, circle.id]));
+
+    // Record on-chain nullifier
     setSpentNullifiers((prev) => [
       {
-        nullifier: proofData.nullifier,
-        circleId,
-        txHash: proofData.txHash,
+        nullifier: proofDetails.nullifierHash || "0x4e7a...91bc",
+        circleId: circle.id,
+        txHash: "0x" + Math.random().toString(16).substr(2, 64),
         timestamp: "Just now"
       },
       ...prev
     ]);
 
-    // Increment circle member count in local state
+    // Increment member count in circle list
     setCircles((prev) =>
-      prev.map((c) => (c.id === circleId ? { ...c, memberCount: c.memberCount + 1 } : c))
+      prev.map((c) => (c.id === circle.id ? { ...c, memberCount: c.memberCount + 1 } : c))
     );
+
+    setActiveTab("settlement");
   };
 
   const handleAddCredential = (cred: PrivateCredential) => {
@@ -109,8 +100,8 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#060814] text-slate-100">
-      {/* Navigation */}
+    <div className="min-h-screen flex flex-col bg-surface text-on-surface">
+      {/* Header */}
       <Navbar
         walletState={walletState}
         onOpenWalletModal={() => setIsWalletModalOpen(true)}
@@ -118,17 +109,19 @@ export const App: React.FC = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onNetworkChange={(net) => midnightService.setNetwork(net)}
+        activeCircleTitle={activeSanctuaryCircle?.title}
       />
 
-      {/* Main Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Sanctuary Canvas */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {activeTab === "explore" && (
           <CircleExplorer
             circles={circles}
             joinedCircleIds={joinedCircleIds}
-            onJoinClick={handleOpenJoinModal}
+            onJoinClick={handleJoinClick}
             onEnterRoomClick={handleEnterRoom}
             onCreateCircleModalOpen={() => setIsCreateModalOpen(true)}
+            verifiableCount={credentials.length}
           />
         )}
 
@@ -136,23 +129,49 @@ export const App: React.FC = () => {
           <CredentialVault
             credentials={credentials}
             onAddCredential={handleAddCredential}
+            onSelectForProver={(cred) => {
+              setActiveTab("studio");
+            }}
           />
         )}
 
-        {activeTab === "privacy" && <PrivacyInspector />}
+        {activeTab === "studio" && (
+          <ZkProofStudio
+            circles={circles}
+            credentials={credentials}
+            onProofGenerated={handleProofGenerated}
+            initialCircle={targetProverCircle}
+          />
+        )}
+
+        {activeTab === "settlement" && latestProofDetails && (
+          <ProofSettlement
+            circle={activeSanctuaryCircle}
+            proofDetails={latestProofDetails}
+            onEnterSanctuary={() => setActiveTab("sanctuary")}
+            onBackToCircles={() => setActiveTab("explore")}
+          />
+        )}
+
+        {activeTab === "sanctuary" && (
+          <PeerSanctuary
+            circle={activeSanctuaryCircle}
+            onExit={() => setActiveTab("explore")}
+          />
+        )}
+
+        {activeTab === "account" && (
+          <ConnectedWalletAccount
+            walletState={walletState}
+            onOpenWalletModal={() => setIsWalletModalOpen(true)}
+            onDisconnect={() => midnightService.disconnectWallet()}
+          />
+        )}
 
         {activeTab === "ledger" && (
           <LedgerExplorer
             network={walletState.network}
             spentNullifiers={spentNullifiers}
-          />
-        )}
-
-        {activeTab === "room" && activeRoomCircle && (
-          <AnonymousRoom
-            circle={activeRoomCircle}
-            onBack={() => setActiveTab("explore")}
-            network={walletState.network}
           />
         )}
       </main>
@@ -161,16 +180,7 @@ export const App: React.FC = () => {
       <LaceWalletModal
         isOpen={isWalletModalOpen}
         onClose={() => setIsWalletModalOpen(false)}
-        onConnect={(mode) => midnightService.connectWallet(mode)}
-        network={walletState.network}
-      />
-
-      <ZkJoinModal
-        isOpen={isJoinModalOpen}
-        onClose={() => setIsJoinModalOpen(false)}
-        circle={selectedCircleForJoin}
-        credentials={credentials}
-        onJoinSuccess={handleJoinSuccess}
+        onConnect={(provider) => midnightService.connectWallet(provider)}
         network={walletState.network}
       />
 
@@ -181,21 +191,23 @@ export const App: React.FC = () => {
         network={walletState.network}
       />
 
-      {/* Footer */}
-      <footer className="border-t border-indigo-950/80 bg-[#060814] py-8 mt-16">
+      {/* Sanctuary Ambient Footer */}
+      <footer className="border-t border-surface-container bg-surface-container-lowest/80 py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-2 text-xs text-slate-400">
-            <Shield className="w-4 h-4 text-cyan-400" />
-            <span className="font-bold text-slate-300">VeilCircle</span>
-            <span>— Zero-Knowledge Membership on Midnight Blockchain</span>
+          <div className="flex items-center gap-2 text-xs text-on-surface-variant">
+            <span className="material-symbols-outlined text-[18px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+              shield_with_heart
+            </span>
+            <span className="font-bold text-on-surface">VeilCircle</span>
+            <span>— Serene Sanctuary ZK on Midnight Blockchain</span>
           </div>
 
-          <div className="flex items-center space-x-6 text-xs text-slate-400 font-mono">
-            <span className="flex items-center space-x-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Midnight Preprod Live</span>
+          <div className="flex items-center gap-6 text-xs text-on-surface-variant font-mono">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              <span className="text-primary font-bold">Midnight Preprod Active</span>
             </span>
-            <span className="text-slate-500">Compact 0.19</span>
+            <span>Compact 0.19 • CIP-30</span>
           </div>
         </div>
       </footer>
