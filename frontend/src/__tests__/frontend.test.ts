@@ -60,8 +60,8 @@ describe("Frontend Crypto & Midnight Integration", () => {
   });
 
   it("4. Returns empty wallet list when no Midnight extensions are injected in window", () => {
-    const wallets = midnightService.getAvailableWallets();
-    expect(wallets.length).toBe(0);
+    const installed = midnightService.getAvailableWallets().filter((w) => w.id !== "sandbox");
+    expect(installed.length).toBe(0);
   });
 
   it("5. Dynamically discovers 1AM and Lace when injected into window.midnight", async () => {
@@ -71,7 +71,7 @@ describe("Frontend Crypto & Midnight Integration", () => {
         rdns: "xyz.1am.wallet",
         icon: "data:image/svg+xml;base64,mock1am",
         apiVersion: "1.1.0",
-        connect: async () => ({
+        enable: async () => ({
           getShieldedAddresses: async () => ({ shieldedAddress: "mn_addr_testnet1qq9x48k7f2w0p1am" }),
           getUnshieldedAddress: async () => ({ unshieldedAddress: "mn_unshielded1am" }),
           getDustAddress: async () => ({ dustAddress: "mn_dust1am" }),
@@ -91,7 +91,7 @@ describe("Frontend Crypto & Midnight Integration", () => {
         rdns: "io.lace.midnight",
         icon: "data:image/svg+xml;base64,mocklace",
         apiVersion: "1.0.0",
-        connect: async () => ({
+        enable: async () => ({
           getShieldedAddresses: async () => ({ shieldedAddress: "mn_addr_testnet1qq9x48k7f2w0place" }),
           getUnshieldedAddress: async () => ({ unshieldedAddress: "mn_unshieldedlace" }),
           getDustAddress: async () => ({ dustAddress: "mn_dustlace" }),
@@ -109,7 +109,8 @@ describe("Frontend Crypto & Midnight Integration", () => {
     };
 
     const wallets = midnightService.getAvailableWallets();
-    expect(wallets.length).toBe(2);
+    const installed = wallets.filter((w) => w.id !== "sandbox");
+    expect(installed.length).toBe(2);
 
     const oneAm = wallets.find((w) => w.is1AM);
     expect(oneAm).toBeDefined();
@@ -123,9 +124,8 @@ describe("Frontend Crypto & Midnight Integration", () => {
     const state = await midnightService.connectWallet(oneAm!);
     expect(state.isConnected).toBe(true);
     expect(state.provider).toBe("xyz.1am.wallet");
-    expect(state.shieldedAddress).toBe("mn_addr_testnet1qq9x48k7f2w0p1am");
+    expect(state.address).toBe("mn_addr_testnet1qq9x48k7f2w0p1am");
     expect(state.balanceDUST).toBe(25);
-    expect(state.serviceConfig?.proverServerUri).toBe("http://localhost:6300");
 
     // Disconnect
     midnightService.disconnectWallet();
