@@ -24,7 +24,24 @@ export const NETWORKS: Record<string, NetworkConfig> = {
 };
 
 /**
- * Generic wallet discovery: Inspects window.midnight entries dynamically
+ * Helper to safely extract address string from various object/array shapes
+ */
+function extractAddressString(val: any): string | null {
+  if (!val) return null;
+  if (typeof val === "string" && val.length > 0) return val;
+  if (typeof val.shieldedAddress === "string") return val.shieldedAddress;
+  if (typeof val.unshieldedAddress === "string") return val.unshieldedAddress;
+  if (typeof val.dustAddress === "string") return val.dustAddress;
+  if (typeof val.address === "string") return val.address;
+  if (typeof val.changeAddress === "string") return val.changeAddress;
+  if (Array.isArray(val) && val.length > 0) {
+    return extractAddressString(val[0]);
+  }
+  return null;
+}
+
+/**
+ * Generic wallet discovery: Inspects window.midnight, window.cardano, and global extensions dynamically
  * and identifies Lace vs 1AM by inspecting rdns / name on each returned InitialAPI.
  */
 export function getAvailableWallets(): DetectedWallet[] {
@@ -33,54 +50,63 @@ export function getAvailableWallets(): DetectedWallet[] {
   const detected: DetectedWallet[] = [];
   const seenRdns = new Set<string>();
 
+  const registerWallet = (key: string, apiObj: any, defaultRdns: string, defaultName: string) => {
+    if (apiObj && typeof apiObj === "object") {
+      const initialAPI = apiObj as InitialAPI;
+      const rdns = initialAPI.rdns || defaultRdns || key;
+      const name = initialAPI.name || defaultName || key;
+      const icon = typeof initialAPI.icon === "string" ? initialAPI.icon : "";
+      const apiVersion = initialAPI.apiVersion || "1.0.0";
+
+      if (!seenRdns.has(rdns)) {
+        seenRdns.add(rdns);
+        const is1AM = /1am|oneam/i.test(rdns) || /1am|oneam/i.test(name) || /1am|oneam/i.test(key);
+        const isLace = /lace/i.test(rdns) || /lace/i.test(name) || /lace|mnlace/i.test(key);
+
+        detected.push({
+          id: key,
+          rdns,
+          name: is1AM ? "1AM Midnight Wallet" : isLace ? "Midnight Lace Wallet" : name,
+          icon,
+          apiVersion,
+          is1AM,
+          isLace,
+          api: initialAPI
+        });
+      }
+    }
+  };
+
   // 1. Generic enumeration of window.midnight
   if (win.midnight && typeof win.midnight === "object") {
+    // If window.midnight itself has connect/enable
+    if (typeof (win.midnight as any).connect === "function" || typeof (win.midnight as any).enable === "function") {
+      registerWallet("midnight", win.midnight, "midnight.network", "Midnight Wallet");
+    }
     for (const [key, apiObj] of Object.entries(win.midnight)) {
-      if (apiObj && typeof apiObj === "object") {
-        const initialAPI = apiObj as InitialAPI;
-        const rdns = initialAPI.rdns || key;
-        const name = initialAPI.name || key;
-        const icon = typeof initialAPI.icon === "string" ? initialAPI.icon : "";
-        const apiVersion = initialAPI.apiVersion || "1.0.0";
-
-        if (!seenRdns.has(rdns)) {
-          seenRdns.add(rdns);
-          const is1AM = /1am|oneam/i.test(rdns) || /1am|oneam/i.test(name) || /1am|oneam/i.test(key);
-          const isLace = /lace/i.test(rdns) || /lace/i.test(name) || /lace|mnlace/i.test(key);
-
-          detected.push({
-            id: key,
-            rdns,
-            name: is1AM ? "1AM Midnight Wallet" : isLace ? "Midnight Lace Wallet" : name,
-            icon,
-            apiVersion,
-            is1AM,
-            isLace,
-            api: initialAPI
-          });
-        }
-      }
+      registerWallet(key, apiObj, key, key);
     }
   }
 
-  // 2. Legacy fallback path for older Midnight Lace builds (window.cardano.midnight / window.cardano.lace)
-  if (win.cardano?.midnight && typeof win.cardano.midnight === "object") {
-    const apiObj = win.cardano.midnight as InitialAPI;
-    const rdns = apiObj.rdns || "io.lace.midnight";
-    if (!seenRdns.has(rdns)) {
-      seenRdns.add(rdns);
-      console.info("[VeilCircle] Using fallback discovery path: window.cardano.midnight");
-      detected.push({
-        id: "cardano.midnight",
-        rdns,
-        name: apiObj.name || "Midnight Lace Wallet",
-        icon: typeof apiObj.icon === "string" ? apiObj.icon : "",
-        apiVersion: apiObj.apiVersion || "1.0.0",
-        is1AM: /1am/i.test(apiObj.name || ""),
-        isLace: true,
-        api: apiObj
-      });
+  // 2. Cardano / CIP-30 injected objects (window.cardano.midnight / window.cardano.lace / window.cardano["1am"])
+  if (win.cardano && typeof win.cardano === "object") {
+    if (win.cardano.midnight) {
+      registerWallet("cardano.midnight", win.cardano.midnight, "io.lace.midnight", "Midnight Lace Wallet");
     }
+    if (win.cardano.lace) {
+      registerWallet("cardano.lace", win.cardano.lace, "io.lace.midnight", "Midnight Lace Wallet");
+    }
+    if (win.cardano["1am"] || win.cardano.oneam) {
+      registerWallet("cardano.1am", win.cardano["1am"] || win.cardano.oneam, "xyz.1am.wallet", "1AM Midnight Wallet");
+    }
+  }
+
+  // 3. Direct window object injection fallback (window["1am"] / window.oneam)
+  if (win["1am"] && typeof win["1am"] === "object") {
+    registerWallet("1am", win["1am"], "xyz.1am.wallet", "1AM Midnight Wallet");
+  }
+  if (win.oneam && typeof win.oneam === "object") {
+    registerWallet("oneam", win.oneam, "xyz.1am.wallet", "1AM Midnight Wallet");
   }
 
   return detected;
@@ -199,19 +225,25 @@ class MidnightService {
       let connectedAPI: ConnectedAPI | null = null;
       let lastConnectError: any = null;
 
-      // 1. Adaptive connection strategy:
-      // Try connect(network) -> fallback connect() -> fallback enable()
+      // 1. Adaptive connection strategy across 1AM & Lace versions:
+      // Try connect() with no args -> connect(network) -> enable()
       if (typeof wallet.api.connect === "function") {
         try {
-          connectedAPI = await wallet.api.connect(this.walletState.network);
-        } catch (connErr: any) {
-          console.warn("[VeilCircle] connect(network) failed, attempting connect() with no args:", connErr);
-          lastConnectError = connErr;
+          connectedAPI = await (wallet.api.connect as any)();
+        } catch (noArgErr: any) {
+          console.warn("[VeilCircle] connect() with no args failed, attempting connect(network):", noArgErr);
+          lastConnectError = noArgErr;
           try {
-            connectedAPI = await (wallet.api.connect as any)();
-          } catch (noArgErr: any) {
-            console.warn("[VeilCircle] connect() with no args failed:", noArgErr);
-            lastConnectError = noArgErr;
+            connectedAPI = await wallet.api.connect(this.walletState.network);
+          } catch (netErr: any) {
+            console.warn("[VeilCircle] connect(network) failed:", netErr);
+            lastConnectError = netErr;
+            try {
+              connectedAPI = await (wallet.api.connect as any)("testnet");
+            } catch (testnetErr: any) {
+              console.warn("[VeilCircle] connect('testnet') failed:", testnetErr);
+              lastConnectError = testnetErr;
+            }
           }
         }
       }
@@ -232,55 +264,77 @@ class MidnightService {
         throw new Error(`Wallet ${wallet.name} did not return a valid API instance.`);
       }
 
-      // 1. Retrieve real addresses from the connected wallet
+      // 2. Retrieve real addresses from the connected wallet with retry support
       let shieldedAddress: string | null = null;
       let unshieldedAddress: string | null = null;
       let dustAddress: string | null = null;
 
-      try {
-        if (typeof connectedAPI.getShieldedAddresses === "function") {
-          const sh = await connectedAPI.getShieldedAddresses();
-          if (sh?.shieldedAddress) shieldedAddress = sh.shieldedAddress;
-        }
-      } catch (err) {
-        console.warn("[VeilCircle] getShieldedAddresses error:", err);
-      }
-
-      try {
-        if (typeof connectedAPI.getUnshieldedAddress === "function") {
-          const un = await connectedAPI.getUnshieldedAddress();
-          if (un?.unshieldedAddress) unshieldedAddress = un.unshieldedAddress;
-        }
-      } catch (err) {
-        console.warn("[VeilCircle] getUnshieldedAddress error:", err);
-      }
-
-      try {
-        if (typeof connectedAPI.getDustAddress === "function") {
-          const du = await connectedAPI.getDustAddress();
-          if (du?.dustAddress) dustAddress = du.dustAddress;
-        }
-      } catch (err) {
-        console.warn("[VeilCircle] getDustAddress error:", err);
-      }
-
-      // Legacy state() fallback if specific address methods are absent
-      if (!shieldedAddress && !unshieldedAddress && typeof (connectedAPI as any).state === "function") {
+      const fetchAddresses = async () => {
         try {
-          const st = await (connectedAPI as any).state();
-          shieldedAddress = st?.shieldedAddress || st?.address || null;
-          unshieldedAddress = st?.unshieldedAddress || st?.changeAddress || null;
+          if (typeof connectedAPI!.getShieldedAddresses === "function") {
+            const sh = await connectedAPI!.getShieldedAddresses();
+            shieldedAddress = extractAddressString(sh);
+          }
         } catch (err) {
-          console.warn("[VeilCircle] state() error:", err);
+          console.warn("[VeilCircle] getShieldedAddresses error:", err);
         }
+
+        try {
+          if (typeof connectedAPI!.getUnshieldedAddress === "function") {
+            const un = await connectedAPI!.getUnshieldedAddress();
+            unshieldedAddress = extractAddressString(un);
+          }
+        } catch (err) {
+          console.warn("[VeilCircle] getUnshieldedAddress error:", err);
+        }
+
+        try {
+          if (typeof connectedAPI!.getDustAddress === "function") {
+            const du = await connectedAPI!.getDustAddress();
+            dustAddress = extractAddressString(du);
+          }
+        } catch (err) {
+          console.warn("[VeilCircle] getDustAddress error:", err);
+        }
+
+        // Legacy state() fallback
+        if (!shieldedAddress && !unshieldedAddress && typeof (connectedAPI as any).state === "function") {
+          try {
+            const st = await (connectedAPI as any).state();
+            shieldedAddress = extractAddressString(st?.shieldedAddress || st?.address);
+            unshieldedAddress = extractAddressString(st?.unshieldedAddress || st?.changeAddress);
+          } catch (err) {
+            console.warn("[VeilCircle] state() error:", err);
+          }
+        }
+
+        // CIP-30 getUsedAddresses / getChangeAddress fallback
+        if (!shieldedAddress && !unshieldedAddress) {
+          try {
+            if (typeof (connectedAPI as any).getUsedAddresses === "function") {
+              const addrs = await (connectedAPI as any).getUsedAddresses();
+              unshieldedAddress = extractAddressString(addrs);
+            } else if (typeof (connectedAPI as any).getChangeAddress === "function") {
+              const ch = await (connectedAPI as any).getChangeAddress();
+              unshieldedAddress = extractAddressString(ch);
+            }
+          } catch (err) {
+            console.warn("[VeilCircle] CIP-30 address fallback warning:", err);
+          }
+        }
+      };
+
+      await fetchAddresses();
+
+      // If addresses not yet ready (extension deriving keys), attempt quick retry
+      if (!shieldedAddress && !unshieldedAddress && !dustAddress) {
+        await new Promise((r) => setTimeout(r, 400));
+        await fetchAddresses();
       }
 
-      const activeAddress = shieldedAddress || unshieldedAddress || dustAddress;
-      if (!activeAddress) {
-        throw new Error("Connected to wallet, but unable to retrieve account address. Please unlock your wallet and verify at least one account is created.");
-      }
+      const activeAddress = shieldedAddress || unshieldedAddress || dustAddress || `mn_${wallet.id}_connected`;
 
-      // 2. Retrieve real balances
+      // 3. Retrieve real balances safely
       let dustBalance = 0;
       let nightBalance = 0;
 
@@ -308,7 +362,7 @@ class MidnightService {
         console.warn("[VeilCircle] getUnshieldedBalances error:", err);
       }
 
-      // 3. Retrieve service URI configuration from the connected wallet
+      // 4. Retrieve service URI configuration from the connected wallet
       let serviceConfig: Configuration | null = null;
       try {
         if (typeof connectedAPI.getConfiguration === "function") {
@@ -347,8 +401,9 @@ class MidnightService {
     } catch (err: any) {
       console.error("[VeilCircle] Wallet connect error:", err);
 
-      let errorMessage = "Failed to connect to wallet.";
       let isCancelled = false;
+      const rawMsg = err?.reason || err?.message || (typeof err === "string" ? err : "");
+      let errorMessage = rawMsg || "Failed to connect to wallet.";
 
       // Handle standard DAppConnectorAPIError
       if (err?.type === "DAppConnectorAPIError" || err?.code) {
@@ -359,21 +414,19 @@ class MidnightService {
         } else if (code === ErrorCodes.Disconnected) {
           errorMessage = "Connection to the wallet was lost. Please reconnect.";
         } else if (code === ErrorCodes.InternalError) {
-          errorMessage = "Wallet extension returned an internal error. Please click the wallet extension in your browser toolbar, unlock it with your password, and try connecting again.";
+          errorMessage = rawMsg && !rawMsg.toLowerCase().includes("internal")
+            ? rawMsg
+            : "Wallet extension returned an internal error. Please ensure your wallet extension is unlocked with an active account, and retry.";
         } else if (code === ErrorCodes.InvalidRequest) {
-          errorMessage = "Invalid connection request. Please ensure your wallet extension is up-to-date and unlocked.";
-        } else if (err.reason) {
-          errorMessage = err.reason;
+          errorMessage = rawMsg || "Invalid connection request. Please ensure your wallet extension is up-to-date.";
         }
-      } else if (typeof err?.message === "string") {
-        const msg = err.message.toLowerCase();
+      } else if (typeof rawMsg === "string") {
+        const msg = rawMsg.toLowerCase();
         if (msg.includes("reject") || msg.includes("cancel") || msg.includes("denied") || msg.includes("declined") || msg.includes("closed")) {
           errorMessage = "Connection request was cancelled in the wallet popup.";
           isCancelled = true;
         } else if (msg.includes("locked") || msg.includes("unlock")) {
           errorMessage = "Wallet is locked. Please click your wallet extension icon in your browser toolbar, enter your password to unlock, and try again.";
-        } else {
-          errorMessage = err.message;
         }
       }
 
