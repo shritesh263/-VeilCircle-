@@ -106,6 +106,7 @@ export const App: React.FC = () => {
         walletState={walletState}
         onOpenWalletModal={() => setIsWalletModalOpen(true)}
         onDisconnectWallet={() => midnightService.disconnectWallet()}
+        onConnectWalletProvider={(provider) => midnightService.connectWallet(provider)}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onNetworkChange={(net) => midnightService.setNetwork(net)}
