@@ -155,6 +155,82 @@ When connecting via 1AM or Lace, VeilCircle immediately launches the extension p
 - **Step 3: Click "Approve" / "Authorize"** — Connects without exposing private keys.
 - **Re-trigger Helper** — 1-click button to re-open popup if minimized or blocked.
 
+<p align="center">
+  <img src="screenshot/v14.png" alt="Multi-Wallet Connection & Next Steps Window" width="85%" />
+</p>
+
+---
+
+## 📸 Application Screenshots & Visual Walkthrough
+
+### 1. 🔍 Safe Circle Discovery & Explorer
+Browse and filter verified support groups with real-time ZK eligibility checks without exposing medical history.
+
+<p align="center">
+  <img src="screenshot/v1.png" alt="Circle Explorer Directory" width="49%" />
+  <img src="screenshot/v1.1.png" alt="Circle Explorer Search & Eligibility" width="49%" />
+</p>
+
+---
+
+### 2. 🔐 ZK Credential Vault
+Store and manage cryptographic clinical intake attestations, recovery referral codes, and clinician signatures strictly in local browser memory.
+
+<p align="center">
+  <img src="screenshot/v2.png" alt="ZK Credential Vault Overview" width="49%" />
+  <img src="screenshot/v3.png" alt="Add Clinical Attestation" width="49%" />
+</p>
+
+---
+
+### 3. 🧪 Client-Side ZK Prover Studio
+Step-by-step witness parameter blinding, Poseidon hashing, Compact circuit constraint satisfaction, and cryptographic proof synthesis.
+
+<p align="center">
+  <img src="screenshot/v4.png" alt="ZK Prover Studio - Witness Setup" width="49%" />
+  <img src="screenshot/v5.png" alt="ZK Prover Studio - Proof Synthesis" width="49%" />
+</p>
+
+---
+
+### 4. ⚡ Proof Settlement & Zero-Gas Relay
+Automated relayer sponsorship through Midnight Compact smart contracts with instant on-chain verification and nullifier registration.
+
+<p align="center">
+  <img src="screenshot/v6.png" alt="Proof Relayer & Settlement" width="49%" />
+  <img src="screenshot/v7.png" alt="Proof Verification & Confirmation" width="49%" />
+</p>
+
+---
+
+### 5. 🌿 Anonymous Peer Sanctuary Room
+Join ephemeral peer support rooms with end-to-end client blinded pseudonyms and zero tracking.
+
+<p align="center">
+  <img src="screenshot/v8.png" alt="Peer Sanctuary Room Overview" width="49%" />
+  <img src="screenshot/v9.png" alt="Sanctuary Ephemeral Chat" width="49%" />
+</p>
+
+---
+
+### 6. 🛡️ Hardware Enclave & Connected Account
+Manage shielded DUST and transparent NIGHT balances, export encrypted enclave backups, and configure auto-lock security controls.
+
+<p align="center">
+  <img src="screenshot/v10.png" alt="Connected Account Dashboard" width="49%" />
+  <img src="screenshot/v11.png" alt="Security & Enclave Backup" width="49%" />
+</p>
+
+---
+
+### 7. 📜 On-Chain Ledger Explorer
+Real-time audit log of public circle states, consumed nullifier hashes, and verifiable block heights on Midnight testnet.
+
+<p align="center">
+  <img src="screenshot/v12.png" alt="Ledger Explorer State" width="49%" />
+  <img src="screenshot/v13.png" alt="Ledger Explorer Nullifier Registry" width="49%" />
+</p>
+
 ---
 
 ## 🖥️ Core DApp Features & User Interface
@@ -253,6 +329,23 @@ VeilCircle/
 │   ├── vite.config.ts
 │   ├── tsconfig.json
 │   └── package.json
+│
+├── screenshot/                               # UI Screenshots & Visual Walkthrough (15 Assets)
+│   ├── v1.png                                # Safe Circle Explorer & Directory
+│   ├── v1.1.png                              # Search & Eligibility Validation
+│   ├── v2.png                                # ZK Credential Vault Overview
+│   ├── v3.png                                # Add Clinical Attestation
+│   ├── v4.png                                # ZK Prover Studio - Witness Parameter Blinding
+│   ├── v5.png                                # Circuit Constraint Satisfaction & Proof Synthesis
+│   ├── v6.png                                # Proof Relayer & Zero-Gas Settlement
+│   ├── v7.png                                # Proof Verification Confirmation
+│   ├── v8.png                                # Anonymous Peer Sanctuary Overview
+│   ├── v9.png                                # Ephemeral Peer Sanctuary Chat
+│   ├── v10.png                               # Hardware Enclave & Account Dashboard
+│   ├── v11.png                               # Enclave Backup Export & Security Controls
+│   ├── v12.png                               # On-Chain Ledger Explorer State
+│   ├── v13.png                               # Public Nullifier Registry Audit
+│   └── v14.png                               # Multi-Wallet Connection & Next Steps Window
 │
 ├── vercel.json                               # Vercel SPA routing & deployment configuration
 ├── .github/workflows/ci.yml                  # GitHub Actions continuous integration pipeline
