@@ -76,7 +76,7 @@ export class OneAmWalletAdapter implements WalletAdapter {
   public async connect(): Promise<{ account: WalletAccount; api: any }> {
     const provider = this.getInjectedProvider();
 
-    if (!provider || (typeof provider.enable !== 'function' && typeof provider.connect !== 'function')) {
+    if (!provider) {
       const debugKeys = typeof window !== 'undefined' ? Object.keys((window as any).midnight || {}) : [];
       console.warn('[1AM Wallet] Extension not detected. Available keys under window.midnight:', debugKeys);
       throw new Error(
@@ -84,57 +84,136 @@ export class OneAmWalletAdapter implements WalletAdapter {
       );
     }
 
-    try {
-      // 1. Call provider.enable() or provider.connect() to trigger popup
-      let api: any = null;
-      if (typeof provider.enable === 'function') {
-        api = await provider.enable();
-      } else if (typeof provider.connect === 'function') {
+    let api: any = null;
+    let lastErr: any = null;
+
+    // Stage 1: Try provider.connect() (Midnight DApp Connector standard)
+    if (typeof provider.connect === 'function') {
+      try {
         api = await provider.connect();
+      } catch (err1: any) {
+        lastErr = err1;
+        try {
+          api = await provider.connect('preprod');
+        } catch (err2: any) {
+          lastErr = err2;
+          try {
+            api = await provider.connect('undeployed');
+          } catch (err3: any) {
+            lastErr = err3;
+            try {
+              api = await provider.connect('preview');
+            } catch (err4: any) {
+              lastErr = err4;
+            }
+          }
+        }
       }
-
-      if (!api) {
-        throw new Error("1AM Wallet returned an empty API handle upon authorization.");
-      }
-
-      this.walletApiHandle = api;
-
-      // 2. Fetch real connected address from API instance returned by extension
-      const shieldedObj = await api.getShieldedAddresses?.().catch(() => null);
-      const unshieldedObj = await api.getUnshieldedAddress?.().catch(() => null);
-      const stateObj = await api.state?.().catch(() => null);
-
-      const address =
-        shieldedObj?.shieldedAddress ||
-        unshieldedObj?.unshieldedAddress ||
-        (await api.getAddress?.().catch(() => null)) ||
-        (await api.getUnusedAddresses?.().catch(() => null))?.[0] ||
-        (await api.getUsedAddresses?.().catch(() => null))?.[0] ||
-        (await api.getChangeAddress?.().catch(() => null)) ||
-        stateObj?.shieldedAddress ||
-        stateObj?.address ||
-        `mn_1am_${Date.now()}`;
-
-      if (!address) {
-        throw new Error(
-          "No address was returned from 1AM Wallet. Please ensure your wallet is unlocked and permission is granted."
-        );
-      }
-
-      const account: WalletAccount = {
-        address,
-        coinPublicKey: (await api.getCoinPublicKey?.().catch(() => null)) || `0x1am_pubkey_${address.slice(-10)}`,
-        networkId: MIDNIGHT_PREPROD_CONFIG.networkId,
-      };
-
-      this.connectedAccount = account;
-      return { account, api };
-    } catch (err: any) {
-      console.error("1AM Wallet connection error or user rejected popup:", err);
-      this.connectedAccount = null;
-      this.walletApiHandle = null;
-      throw new Error(err?.message || "1AM Wallet connection request was rejected or failed.");
     }
+
+    // Stage 2: Try provider.enable() (CIP-30 standard)
+    if (!api && typeof provider.enable === 'function') {
+      try {
+        api = await provider.enable();
+      } catch (enableErr: any) {
+        lastErr = enableErr;
+      }
+    }
+
+    if (!api) {
+      console.error("[1AM Wallet] All connection methods failed:", lastErr);
+      const raw = lastErr?.reason || lastErr?.message || (typeof lastErr === "string" ? lastErr : "");
+      if (raw.toLowerCase().includes("reject") || raw.toLowerCase().includes("cancel") || raw.toLowerCase().includes("denied")) {
+        throw new Error("1AM Wallet connection request was cancelled in the wallet popup.");
+      }
+      throw new Error(
+        raw || "1AM Wallet connection request failed. Please ensure the extension is unlocked and retry."
+      );
+    }
+
+    this.walletApiHandle = api;
+
+    // Stage 3: Retrieve connected addresses safely
+    let address: string | null = null;
+    try {
+      if (typeof api.getShieldedAddresses === 'function') {
+        const sh = await api.getShieldedAddresses();
+        address = sh?.shieldedAddress || (typeof sh === 'string' ? sh : null);
+      }
+    } catch {}
+
+    if (!address) {
+      try {
+        if (typeof api.getUnshieldedAddress === 'function') {
+          const un = await api.getUnshieldedAddress();
+          address = un?.unshieldedAddress || (typeof un === 'string' ? un : null);
+        }
+      } catch {}
+    }
+
+    if (!address) {
+      try {
+        if (typeof api.getAddress === 'function') {
+          address = await api.getAddress();
+        }
+      } catch {}
+    }
+
+    if (!address) {
+      try {
+        if (typeof api.getUnusedAddresses === 'function') {
+          const addrs = await api.getUnusedAddresses();
+          address = addrs?.[0] || null;
+        }
+      } catch {}
+    }
+
+    if (!address) {
+      try {
+        if (typeof api.getUsedAddresses === 'function') {
+          const addrs = await api.getUsedAddresses();
+          address = addrs?.[0] || null;
+        }
+      } catch {}
+    }
+
+    if (!address) {
+      try {
+        if (typeof api.getChangeAddress === 'function') {
+          address = await api.getChangeAddress();
+        }
+      } catch {}
+    }
+
+    if (!address) {
+      try {
+        if (typeof api.state === 'function') {
+          const st = await api.state();
+          address = st?.shieldedAddress || st?.address || st?.changeAddress || null;
+        }
+      } catch {}
+    }
+
+    if (!address) {
+      address = `mn_1am_${Date.now()}`;
+    }
+
+    let pubKey = `0x1am_pubkey_${address.slice(-10)}`;
+    try {
+      if (typeof api.getCoinPublicKey === 'function') {
+        const pk = await api.getCoinPublicKey();
+        if (pk) pubKey = pk;
+      }
+    } catch {}
+
+    const account: WalletAccount = {
+      address,
+      coinPublicKey: pubKey,
+      networkId: MIDNIGHT_PREPROD_CONFIG.networkId,
+    };
+
+    this.connectedAccount = account;
+    return { account, api };
   }
 
   public async disconnect(): Promise<void> {
