@@ -20,29 +20,15 @@ export const CircleExplorer: React.FC<CircleExplorerProps> = ({
   verifiableCount = 3
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<string>("all");
-
-  const filterCategories = [
-    { id: "all", label: "All Circles", icon: "all_inclusive" },
-    { id: "caregiver", label: "Caregiver Support", icon: "volunteer_activism" },
-    { id: "burnout", label: "Burnout & Recovery", icon: "self_improvement" },
-    { id: "chronic", label: "Chronic Health", icon: "vital_signs" },
-    { id: "referrals", label: "Verified Referrals", icon: "verified" }
-  ];
 
   const filteredCircles = circles.filter((circle) => {
-    const matchesCategory =
-      activeFilter === "all" ||
-      circle.tags.some((t) => t.toLowerCase() === activeFilter.toLowerCase()) ||
-      circle.category.toLowerCase().includes(activeFilter.toLowerCase());
-
     const matchesSearch =
       circle.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       circle.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       circle.eligibilityCriteria.toLowerCase().includes(searchQuery.toLowerCase()) ||
       circle.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    return matchesCategory && matchesSearch;
+    return matchesSearch;
   });
 
   return (
@@ -71,50 +57,30 @@ export const CircleExplorer: React.FC<CircleExplorerProps> = ({
         </div>
       </div>
 
-      {/* Interactive Search & Filter Clearing */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          {/* Search Field */}
-          <div className="relative w-full sm:flex-1">
-            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">
-              search
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search safe spaces, clinical criteria, or tags..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline text-xs sm:text-sm shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-surface-container focus:outline-none focus:border-primary transition-all"
-            />
-          </div>
-
-          {/* Create Circle Button */}
-          <button
-            onClick={onCreateCircleModalOpen}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-primary font-bold text-xs border border-surface-container shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">add_circle</span>
-            <span>Create Safe Circle</span>
-          </button>
+      {/* Interactive Search Field & Create Circle Action */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+        {/* Search Field */}
+        <div className="relative w-full sm:flex-1">
+          <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">
+            search
+          </span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search safe spaces, clinical criteria, or tags..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline text-xs sm:text-sm shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-surface-container focus:outline-none focus:border-primary transition-all"
+          />
         </div>
 
-        {/* Filter Pills Horizontal Scroll */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {filterCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveFilter(cat.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all duration-200 ${
-                activeFilter === cat.id
-                  ? "bg-primary text-on-primary shadow-sm"
-                  : "bg-surface-container-lowest text-on-surface-variant hover:text-primary border border-surface-container shadow-xs"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]">{cat.icon}</span>
-              <span>{cat.label}</span>
-            </button>
-          ))}
-        </div>
+        {/* Create Circle Button */}
+        <button
+          onClick={onCreateCircleModalOpen}
+          className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-primary font-bold text-xs border border-surface-container shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
+        >
+          <span className="material-symbols-outlined text-[18px]">add_circle</span>
+          <span>Create Safe Circle</span>
+        </button>
       </div>
 
       {/* Realtime Eligibility Summary Bar */}
