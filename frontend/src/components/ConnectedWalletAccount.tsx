@@ -44,23 +44,8 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
     }
   };
 
-  const handleDirectConnect = async (wallet: DetectedWallet) => {
-    setErrorNotice(null);
-    setConnectingRdns(wallet.rdns);
-    try {
-      await midnightService.connectWallet(wallet);
-      setToastMsg(`Connected to ${wallet.name}`);
-      setTimeout(() => setToastMsg(null), 3000);
-    } catch (err: any) {
-      const state = midnightService.getWalletState();
-      if (state.isCancelled) {
-        setErrorNotice("Connection request was cancelled in the wallet popup.");
-      } else {
-        setErrorNotice(err?.message || "Failed to establish wallet connection.");
-      }
-    } finally {
-      setConnectingRdns(null);
-    }
+  const handleDirectConnect = async (_wallet: DetectedWallet) => {
+    onOpenWalletModal();
   };
 
   const handleExportBackup = () => {
