@@ -15,6 +15,7 @@ export const PeerSanctuary: React.FC<PeerSanctuaryProps> = ({
   const [inputText, setInputText] = useState("");
   const [isWhisperActive, setIsWhisperActive] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -25,13 +26,14 @@ export const PeerSanctuary: React.FC<PeerSanctuaryProps> = ({
     e.preventDefault();
     if (!inputText.trim()) return;
 
+    const userText = inputText.trim();
     const newMsg: PeerMessage = {
       id: "msg_" + Date.now(),
       circleId: circle.id,
       senderAlias: "You (Veil #419)",
       senderAvatarEmoji: "🌿",
       badgeText: "ZK Verified",
-      content: inputText.trim(),
+      content: userText,
       timestamp: "Just now",
       isSelf: true,
       reactions: {
@@ -43,6 +45,40 @@ export const PeerSanctuary: React.FC<PeerSanctuaryProps> = ({
 
     setMessages((prev) => [...prev, newMsg]);
     setInputText("");
+    showToast("Message broadcasted with zero-knowledge anonymity.");
+
+    // Simulate an empathetic peer response in the sanctuary
+    setIsTyping(true);
+    setTimeout(() => {
+      const peerResponses = [
+        "Thank you for sharing this so openly. You are not alone in this journey.",
+        "Sending you calm and strength. This sanctuary is always here for you.",
+        "Holding space with you today. Take gentle breaths.",
+        "We hear you, and we honor what you're navigating. One step at a time."
+      ];
+      const randomResponse = peerResponses[Math.floor(Math.random() * peerResponses.length)];
+      const peerAliases = ["Veil Companion #812", "Serene Seeker #105", "Quiet Guardian #340"];
+      const randomAlias = peerAliases[Math.floor(Math.random() * peerAliases.length)];
+
+      const peerMsg: PeerMessage = {
+        id: "msg_reply_" + Date.now(),
+        circleId: circle.id,
+        senderAlias: randomAlias,
+        senderAvatarEmoji: "🕊️",
+        badgeText: "ZK Verified",
+        content: randomResponse,
+        timestamp: "Just now",
+        isSelf: false,
+        reactions: {
+          heart: 2,
+          warmth: 3,
+          presence: 1
+        }
+      };
+
+      setMessages((prev) => [...prev, peerMsg]);
+      setIsTyping(false);
+    }, 2200);
   };
 
   const handleReaction = (msgId: string, type: "heart" | "warmth" | "presence") => {
@@ -89,7 +125,7 @@ export const PeerSanctuary: React.FC<PeerSanctuaryProps> = ({
             <div className="flex items-center gap-2 mt-1">
               <span className="material-symbols-outlined text-[16px] text-secondary">shield_lock</span>
               <span className="text-xs text-on-surface-variant font-medium">
-                Shielded Room • 14 Peers Present
+                Shielded Sanctuary • 14 Verified Peers Present
               </span>
             </div>
           </div>
@@ -100,7 +136,7 @@ export const PeerSanctuary: React.FC<PeerSanctuaryProps> = ({
             className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant hover:bg-tertiary-fixed-dim transition-all shadow-xs active:scale-95 font-bold text-xs"
           >
             <span className="material-symbols-outlined text-[18px]">lock_reset</span>
-            <span>Quick Exit</span>
+            <span>Exit Sanctuary</span>
           </button>
         </div>
 
@@ -108,11 +144,11 @@ export const PeerSanctuary: React.FC<PeerSanctuaryProps> = ({
         <div className="mt-4 pt-3 flex items-center justify-between border-t border-surface-container text-on-surface-variant text-xs font-mono">
           <div className="flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[16px] text-primary">verified_user</span>
-            <span>Midnight Proof: Shielded</span>
+            <span>Midnight Proof: Shielded (Nullifier Active)</span>
           </div>
           <div className="flex items-center gap-1.5 text-secondary">
             <span className="material-symbols-outlined text-[16px]">auto_delete</span>
-            <span>Disappears in 24h</span>
+            <span>Ephemeral Session • Disappears in 24h</span>
           </div>
         </div>
       </div>
@@ -230,6 +266,13 @@ export const PeerSanctuary: React.FC<PeerSanctuaryProps> = ({
             </div>
           </div>
         ))}
+
+        {isTyping && (
+          <div className="rounded-2xl shadow-xs p-4 bg-surface-container-lowest border border-surface-container mr-4 sm:mr-8 flex items-center gap-2 text-xs text-on-surface-variant animate-pulse">
+            <span className="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+            <span>A peer in the sanctuary is writing a response...</span>
+          </div>
+        )}
       </div>
 
       {/* Peer Sanctuary Input Dock */}
@@ -245,7 +288,7 @@ export const PeerSanctuary: React.FC<PeerSanctuaryProps> = ({
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className="px-5 py-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50 shrink-0"
+            className="px-5 py-3 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50 shrink-0 cursor-pointer"
           >
             <span>Send</span>
             <span className="material-symbols-outlined text-[18px]">send</span>

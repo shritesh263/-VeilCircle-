@@ -20,15 +20,19 @@ export const CircleExplorer: React.FC<CircleExplorerProps> = ({
   verifiableCount = 3
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
+  const categories = ["All", "Caregiver Support", "Burnout & Recovery", "Chronic Health", "Mental Health"];
 
   const filteredCircles = circles.filter((circle) => {
+    const matchesCategory = selectedCategory === "All" || circle.category === selectedCategory;
     const matchesSearch =
       circle.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       circle.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       circle.eligibilityCriteria.toLowerCase().includes(searchQuery.toLowerCase()) ||
       circle.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    return matchesSearch;
+    return matchesCategory && matchesSearch;
   });
 
   return (
@@ -71,16 +75,41 @@ export const CircleExplorer: React.FC<CircleExplorerProps> = ({
             placeholder="Search safe spaces, clinical criteria, or tags..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline text-xs sm:text-sm shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-surface-container focus:outline-none focus:border-primary transition-all"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant hover:text-on-surface"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Create Circle Button */}
         <button
           onClick={onCreateCircleModalOpen}
-          className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-primary font-bold text-xs border border-surface-container shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
+          className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-primary font-bold text-xs border border-surface-container shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95"
         >
           <span className="material-symbols-outlined text-[18px]">add_circle</span>
           <span>Create Safe Circle</span>
         </button>
+      </div>
+
+      {/* Category Filter Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              selectedCategory === cat
+                ? "bg-primary text-on-primary shadow-xs"
+                : "bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
       </div>
 
       {/* Realtime Eligibility Summary Bar */}
@@ -88,7 +117,7 @@ export const CircleExplorer: React.FC<CircleExplorerProps> = ({
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary text-[20px]">key_vertical</span>
           <span className="text-xs font-semibold text-on-surface">
-            {verifiableCount} proofs verifiable in local wallet
+            {verifiableCount} proofs verifiable in local wallet • Showing {filteredCircles.length} circles
           </span>
         </div>
         <span className="text-[10px] font-bold uppercase tracking-wider text-secondary font-mono">
@@ -97,17 +126,36 @@ export const CircleExplorer: React.FC<CircleExplorerProps> = ({
       </div>
 
       {/* Peer Circles Directory Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filteredCircles.map((circle) => (
-          <CircleCard
-            key={circle.id}
-            circle={circle}
-            isMember={joinedCircleIds.has(circle.id)}
-            onJoinClick={onJoinClick}
-            onEnterRoomClick={onEnterRoomClick}
-          />
-        ))}
-      </div>
+      {filteredCircles.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {filteredCircles.map((circle) => (
+            <CircleCard
+              key={circle.id}
+              circle={circle}
+              isMember={joinedCircleIds.has(circle.id)}
+              onJoinClick={onJoinClick}
+              onEnterRoomClick={onEnterRoomClick}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-surface-container-lowest rounded-2xl p-8 border border-surface-container text-center space-y-3">
+          <span className="material-symbols-outlined text-4xl text-on-surface-variant">search_off</span>
+          <h3 className="text-base font-bold text-on-surface">No Safe Circles Found</h3>
+          <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
+            No circles match your current search or category filter. Try clearing your search query or reset the filter.
+          </p>
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedCategory("All");
+            }}
+            className="px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-xs hover:bg-primary/90"
+          >
+            Reset Filters
+          </button>
+        </div>
+      )}
     </div>
   );
 };
