@@ -7,10 +7,15 @@
   "scripts": {
     "build": "tsc",
     "compact:compile": "node scripts/compile.js",
+    "compact:check": "echo 'Compact syntax check - ensure contract compiles'",
     "test": "vitest run",
     "test:watch": "vitest",
+    "deploy": "ts-node scripts/deploy.ts --network ${MIDNIGHT_NETWORK:-preprod}",
     "deploy:preview": "ts-node scripts/deploy.ts --network preview",
-    "deploy:preprod": "ts-node scripts/deploy.ts --network preprod"
+    "deploy:preprod": "ts-node scripts/deploy.ts --network preprod",
+    "deploy:real": "ts-node scripts/deploy-real.ts",
+    "deploy:real:preview": "NETWORK=preview ts-node scripts/deploy-real.ts",
+    "deploy:real:preprod": "NETWORK=preprod ts-node scripts/deploy-real.ts"
   },
   "keywords": ["midnight", "compact", "zero-knowledge", "privacy", "zk-snark", "veilcircle"],
   "author": "VeilCircle Team",
