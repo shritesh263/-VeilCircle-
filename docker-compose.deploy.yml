@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # Midnight Node - Core blockchain node
+  midnight-node:
+    image: midnightnetwork/midnight-node:latest
+    container_name: midnight-node
+    ports:
+      - "26657:26657"  # RPC port
+      - "26656:26656"  # P2P port
+    environment:
+      - NETWORK=preview
+      - LOG_LEVEL=info
+    volumes:
+      - midnight-data:/root/.midnight
+    networks:
+      - midnight-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:26657/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Midnight Indexer - Indexes blockchain data
+  indexer:
+    image: midnightnetwork/midnight-indexer:latest
+    container_name: midnight-indexer
+    ports:
+      - "8080:8080"   # GraphQL API
+    environment:
+      - NODE_URL=http://midnight-node:26657
+      - NETWORK=preview
+      - LOG_LEVEL=info
+    depends_on:
+      midnight-node:
+        condition: service_healthy
+    networks:
+      - midnight-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Proof Server - Generates ZK proofs
+  proof-server:
+    image: midnightnetwork/proof-server:latest
+    container_name: proof-server
+    ports:
+      - "6300:6300"
+    environment:
+      - LOG_LEVEL=info
+    volumes:
+      - ./contract/src/managed:/circuits:ro
+    networks:
+      - midnight-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6300/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Contract Deployer - Deploys VeilCircle contract
+  contract-deployer:
+    image: node:18-alpine
+    container_name: veilcircle-deployer
+    working_dir: /app
+    volumes:
+      - ./contract:/app
+    environment:
+      - NETWORK=preview
+      - WALLET_SEED=${WALLET_SEED}
+      - NODE_URL=http://midnight-node:26657
+      - INDEXER_URL=http://indexer:8080
+      - PROOF_SERVER_URL=http://proof-server:6300
+    command: |
+      sh -c "
+        echo 'Installing dependencies...' &&
+        npm install &&
+        echo 'Compiling Compact contract...' &&
+        npm run compact:compile &&
+        echo 'Deploying to Midnight Preview...' &&
+        npm run deploy:real &&
+        echo 'Deployment complete!'
+      "
+    depends_on:
+      midnight-node:
+        condition: service_healthy
+      indexer:
+        condition: service_healthy
+      proof-server:
+        condition: service_healthy
+    networks:
+      - midnight-network
+
+networks:
+  midnight-network:
+    driver: bridge
+
+volumes:
+  midnight-data:
+    driver: local
