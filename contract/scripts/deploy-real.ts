@@ -2,36 +2,20 @@
 /**
  * Real Compact Contract Deployment Script for Midnight Network
  * 
+ * This script uses Midnight CLI for deployment (no SDK dependencies needed)
+ * 
  * Prerequisites:
- * 1. Funded wallet on Preprod/Preview testnet
- * 2. Environment variables set (WALLET_SEED, NETWORK)
+ * 1. Midnight CLI installed: uv tool install @midnight-ntwrk/midnight-cli
+ * 2. Funded wallet on Preprod/Preview testnet
  * 3. Compiled Compact contract in managed/ directory
  * 
  * Usage:
- *   NETWORK=preprod WALLET_SEED="your seed phrase" npm run deploy:real
+ *   NETWORK=preprod npm run deploy:real
  */
 
-import { ContractDeploymentConfig, deployContract } from '@midnight-ntwrk/midnight-js-contracts';
-import { providers, Wallet } from '@midnight-ntwrk/midnight-js-types';
-import { createWalletFromSeed } from '@midnight-ntwrk/midnight-js-wallet';
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-
-// Network configurations
-const NETWORKS = {
-  preprod: {
-    nodeUri: 'https://rpc.preprod.midnight.network',
-    indexerUri: 'https://indexer.preprod.midnight.network/api/v1/graphql',
-    proverServerUri: 'http://localhost:6300', // Local proof server
-    faucetUri: 'https://faucet.preprod.midnight.network',
-  },
-  preview: {
-    nodeUri: 'https://rpc.preview.midnight.network',
-    indexerUri: 'https://indexer.preview.midnight.network/api/v1/graphql',
-    proverServerUri: 'http://localhost:6300',
-    faucetUri: 'https://faucet.preview.midnight.network',
-  },
-};
 
 async function main() {
   console.log('=================================================');
@@ -39,47 +23,26 @@ async function main() {
   console.log('=================================================\n');
 
   // 1. Read environment configuration
-  const network = (process.env.NETWORK || 'preprod') as keyof typeof NETWORKS;
-  const walletSeed = process.env.WALLET_SEED;
+  const network = (process.env.NETWORK || 'preprod') as 'preprod' | 'preview';
+  const walletName = process.env.WALLET_NAME || 'veilcircle-wallet';
 
-  if (!walletSeed) {
-    console.error('❌ Error: WALLET_SEED environment variable not set');
-    console.log('\nUsage:');
-    console.log('  NETWORK=preprod WALLET_SEED="your 12-24 word seed phrase" npm run deploy:real\n');
-    process.exit(1);
-  }
-
-  if (!NETWORKS[network]) {
-    console.error(`❌ Error: Invalid network "${network}". Must be "preprod" or "preview"`);
-    process.exit(1);
-  }
-
-  const config = NETWORKS[network];
   console.log(`📡 Network: ${network.toUpperCase()}`);
-  console.log(`🔗 Node: ${config.nodeUri}`);
-  console.log(`🔍 Indexer: ${config.indexerUri}\n`);
+  console.log(`👛 Wallet: ${walletName}\n`);
 
-  // 2. Initialize wallet
-  console.log('🔑 Initializing wallet...');
-  const wallet = await createWalletFromSeed(walletSeed, {
-    nodeUri: config.nodeUri,
-    indexerUri: config.indexerUri,
-  });
-
-  const shieldedAddress = await wallet.getShieldedAddress();
-  const dustBalance = await wallet.getDustBalance();
-  
-  console.log(`   Address: ${shieldedAddress}`);
-  console.log(`   Balance: ${dustBalance / 1_000_000} DUST\n`);
-
-  if (dustBalance < 1_000_000) {
-    console.error('❌ Insufficient DUST balance (need at least 1 DUST)');
-    console.log(`💧 Get testnet DUST from: ${config.faucetUri}`);
+  // 2. Check Midnight CLI is installed
+  console.log('🔍 Checking Midnight CLI installation...');
+  try {
+    execSync('midnight-cli --version', { stdio: 'pipe' });
+    console.log('   ✓ Midnight CLI is installed\n');
+  } catch (error) {
+    console.error('❌ Midnight CLI not found. Install it with:');
+    console.log('   curl -LsSf https://astral.sh/uv/install.sh | sh');
+    console.log('   uv tool install @midnight-ntwrk/midnight-cli\n');
     process.exit(1);
   }
 
-  // 3. Load compiled contract
-  console.log('📦 Loading compiled Compact contract...');
+  // 3. Check compiled contract exists
+  console.log('📦 Checking compiled contract...');
   const contractPath = path.join(__dirname, '..', 'src', 'managed', 'veilcircle');
   
   if (!fs.existsSync(contractPath)) {
@@ -87,7 +50,6 @@ async function main() {
     process.exit(1);
   }
 
-  // Read contract bytecode and circuits
   const circuitsFile = path.join(contractPath, 'circuits.json');
   if (!fs.existsSync(circuitsFile)) {
     console.error('❌ circuits.json not found. Ensure contract is compiled.');
@@ -95,47 +57,90 @@ async function main() {
   }
 
   const circuits = JSON.parse(fs.readFileSync(circuitsFile, 'utf-8'));
-  console.log(`   ✓ Found ${Object.keys(circuits).length} circuits`);
+  console.log(`   ✓ Found ${Object.keys(circuits).length} circuits\n`);
 
-  // 4. Deploy contract
-  console.log('\n🚀 Deploying contract to Midnight Network...');
+  // 4. Check wallet exists
+  console.log(`🔑 Checking wallet: ${walletName}...`);
+  try {
+    const walletAddress = execSync(`midnight-cli wallet address --wallet ${walletName}`, { 
+      encoding: 'utf-8',
+      stdio: 'pipe'
+    }).trim();
+    console.log(`   ✓ Wallet found: ${walletAddress}\n`);
+  } catch (error) {
+    console.error(`❌ Wallet "${walletName}" not found.`);
+    console.log('\nCreate wallet with:');
+    console.log(`   midnight-cli wallet create --name ${walletName}`);
+    console.log('\nOr use existing wallet:');
+    console.log(`   WALLET_NAME=my-wallet npm run deploy:real\n`);
+    process.exit(1);
+  }
+
+  // 5. Check wallet balance
+  console.log('💰 Checking wallet balance...');
+  try {
+    const balance = execSync(`midnight-cli wallet balance --wallet ${walletName} --network ${network}`, {
+      encoding: 'utf-8',
+      stdio: 'pipe'
+    }).trim();
+    console.log(`   Balance: ${balance}`);
+    
+    // Parse balance (expecting format like "10.5 DUST")
+    const balanceMatch = balance.match(/(\d+\.?\d*)/);
+    if (balanceMatch && parseFloat(balanceMatch[1]) < 1) {
+      console.error('\n❌ Insufficient balance (need at least 1 DUST)');
+      console.log(`💧 Get testnet DUST from: https://faucet.${network}.midnight.network\n`);
+      process.exit(1);
+    }
+    console.log('   ✓ Sufficient balance\n');
+  } catch (error) {
+    console.warn('   ⚠️  Could not check balance, continuing anyway...\n');
+  }
+
+  // 6. Deploy contract
+  console.log('🚀 Deploying contract to Midnight Network...');
   console.log('   (This may take 30-60 seconds...)\n');
 
   try {
-    // Deploy using Midnight JS SDK
-    const deploymentConfig: ContractDeploymentConfig = {
-      wallet,
-      contractBytecode: circuits, // This should be the actual compiled bytecode
-      initialState: {}, // Add initial state if needed
-      proverServerUri: config.proverServerUri,
-    };
+    const deployOutput = execSync(
+      `midnight-cli contract deploy --contract ${contractPath} --network ${network} --wallet ${walletName} --wait-for-confirmation`,
+      { 
+        encoding: 'utf-8',
+        stdio: 'pipe'
+      }
+    );
 
-    // NOTE: This is pseudocode - actual deployment depends on your Midnight SDK version
-    // Adjust based on @midnight-ntwrk/midnight-js-contracts API
-    const deploymentResult = await deployContract(deploymentConfig);
+    console.log(deployOutput);
 
-    const contractAddress = deploymentResult.contractAddress;
-    const txHash = deploymentResult.transactionHash;
-    const blockHeight = deploymentResult.blockHeight;
+    // Parse contract address from output
+    const addressMatch = deployOutput.match(/Contract Address:\s*([a-z0-9_]+)/i) || 
+                        deployOutput.match(/Deployed to:\s*([a-z0-9_]+)/i) ||
+                        deployOutput.match(/Address:\s*([a-z0-9_]+)/i);
+    
+    const contractAddress = addressMatch ? addressMatch[1] : 'CHECK_LOGS_FOR_ADDRESS';
 
-    console.log('✅ Contract deployed successfully!\n');
+    // Parse transaction hash from output
+    const txMatch = deployOutput.match(/Transaction Hash:\s*(0x[a-f0-9]+)/i) ||
+                    deployOutput.match(/Tx Hash:\s*(0x[a-f0-9]+)/i);
+    
+    const txHash = txMatch ? txMatch[1] : '0x...';
+
+    console.log('\n✅ Contract deployed successfully!\n');
     console.log('Deployment Details:');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`📍 Contract Address: ${contractAddress}`);
     console.log(`🔗 Transaction Hash: ${txHash}`);
-    console.log(`📦 Block Height: ${blockHeight}`);
     console.log(`🔍 Explorer: https://explorer.${network}.midnight.network/contracts/${contractAddress}`);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-    // 5. Save deployment artifact
+    // 7. Save deployment artifact
     const deploymentArtifact = {
       network,
       contractAddress,
       contractName: 'VeilCircle',
       deployedAt: new Date().toISOString(),
       transactionHash: txHash,
-      blockHeight,
-      deployerAddress: shieldedAddress,
+      walletName,
       circuits: Object.keys(circuits),
       explorerUrl: `https://explorer.${network}.midnight.network/contracts/${contractAddress}`,
     };
@@ -150,18 +155,29 @@ async function main() {
 
     console.log(`💾 Deployment record saved: deployments/${network}.json`);
     console.log('\n📝 Next Steps:');
-    console.log('   1. Verify contract on explorer');
-    console.log('   2. Update frontend/src/services/midnight.ts with contract address');
+    console.log('   1. Verify contract on explorer (link above)');
+    console.log('   2. Update frontend/src/services/midnight.ts with contract address:');
+    console.log(`      contractAddress: "${contractAddress}"`);
     console.log('   3. Update CONTRACT_ADDRESSES.md with deployment details');
+    console.log('   4. Rebuild frontend: cd ../frontend && npm run build');
     console.log('\n=================================================');
 
   } catch (error: any) {
-    console.error('\n❌ Deployment failed:', error.message);
-    console.error('\nTroubleshooting:');
+    console.error('\n❌ Deployment failed!');
+    console.error('Error:', error.message);
+    
+    if (error.stdout) {
+      console.error('\nOutput:', error.stdout.toString());
+    }
+    if (error.stderr) {
+      console.error('\nError details:', error.stderr.toString());
+    }
+    
+    console.error('\n🔧 Troubleshooting:');
     console.error('  • Ensure wallet has sufficient DUST balance');
     console.error('  • Verify network endpoints are accessible');
-    console.error('  • Check proof server is running on port 6300');
-    console.error('  • Ensure contract is properly compiled\n');
+    console.error('  • Check contract is properly compiled');
+    console.error('  • Try again with: npm run deploy:real\n');
     process.exit(1);
   }
 }
