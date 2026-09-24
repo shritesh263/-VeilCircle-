@@ -16,8 +16,8 @@
 | Resource | URL / Address | Description | Status |
 | :--- | :--- | :--- | :--- |
 | 🚀 **Live Web DApp** | [https://veil-circle.vercel.app/](https://veil-circle.vercel.app/) | Official Production Vercel Deployment | 🟢 **Live & Active** |
-| 🛡️ **Midnight Preprod Contract** | `mn_contract1veilcirclepreprod4b67857a492f6fb23e475b80` | Preprod Testnet Smart Contract | 🟢 **Deployed** |
-| 🧪 **Midnight Preview Contract** | `mn_contract1veilcirclepreviewc60bfbe2e231907285331371` | Preview Testnet Smart Contract | 🟢 **Deployed** |
+| 🛡️ **Midnight Preprod Contract** | `mn_contract_preprod1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpzs0ku` | Preprod Testnet Smart Contract | 🟢 **Deployed** |
+| 🧪 **Midnight Preview Contract** | `mn_contract_preview1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqlhvjal` | Preview Testnet Smart Contract | 🟢 **Deployed** |
 | 🔍 **Midnight Preprod Explorer** | [explorer.preprod.midnight.network](https://explorer.preprod.midnight.network) | On-Chain Transaction & Block Explorer | 🟢 **Online** |
 | ⚡ **Midnight Indexer API** | `https://indexer.preprod.midnight.network/api/v1/graphql` | GraphQL Substrate Indexer | 🟢 **Online** |
 | 🌐 **Midnight Substrate RPC** | `https://rpc.preprod.midnight.network` | Remote Node RPC Endpoint | 🟢 **Online** |

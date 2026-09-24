@@ -13,7 +13,7 @@ export const DEFAULT_CIRCLES: Circle[] = [
     cohort: "Cohort 04",
     scheduleBadge: "Daily Check-in 7pm",
     isActive: true,
-    contractAddress: "mn_contract1veilcirclepreprod4b67857a492f6fb23e475b80",
+    contractAddress: "mn_contract_preprod1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpzs0ku",
     badgeColor: "primary",
     iconName: "nature_people",
     tags: ["caregiver", "referrals", "oncology", "sanctuary"]
@@ -30,7 +30,7 @@ export const DEFAULT_CIRCLES: Circle[] = [
     cohort: "Cohort 02",
     scheduleBadge: "Peer Moderated",
     isActive: true,
-    contractAddress: "mn_contract1veilcirclepreprod4b67857a492f6fb23e475b80",
+    contractAddress: "mn_contract_preprod1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpzs0ku",
     badgeColor: "secondary",
     iconName: "stethoscope",
     tags: ["burnout", "referrals", "physicians", "high-privacy"]
@@ -47,7 +47,7 @@ export const DEFAULT_CIRCLES: Circle[] = [
     cohort: "Cohort 07",
     scheduleBadge: "Asynchronous",
     isActive: true,
-    contractAddress: "mn_contract1veilcirclepreprod4b67857a492f6fb23e475b80",
+    contractAddress: "mn_contract_preprod1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpzs0ku",
     badgeColor: "primary",
     iconName: "vital_signs",
     tags: ["chronic", "pain-management", "open-enclave"]
@@ -64,7 +64,7 @@ export const DEFAULT_CIRCLES: Circle[] = [
     cohort: "Cohort 01",
     scheduleBadge: "Gentle Mode",
     isActive: true,
-    contractAddress: "mn_contract1veilcirclepreprod4b67857a492f6fb23e475b80",
+    contractAddress: "mn_contract_preprod1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpzs0ku",
     badgeColor: "tertiary",
     iconName: "spa",
     tags: ["caregiver", "burnout", "grief", "healing"]

@@ -8,7 +8,7 @@ export const NETWORKS: Record<string, NetworkConfig> = {
   preprod: {
     name: "preprod",
     label: "Midnight Preprod Testnet",
-    contractAddress: "mn_contract1veilcirclepreprod4b67857a492f6fb23e475b80",
+    contractAddress: "mn_contract_preprod1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpzs0ku",
     indexerUrl: "https://indexer.preprod.midnight.network/api/v1/graphql",
     nodeUrl: "https://rpc.preprod.midnight.network",
     explorerUrl: "https://explorer.preprod.midnight.network"
@@ -16,7 +16,7 @@ export const NETWORKS: Record<string, NetworkConfig> = {
   preview: {
     name: "preview",
     label: "Midnight Preview Testnet",
-    contractAddress: "mn_contract1veilcirclepreviewc60bfbe2e231907285331371",
+    contractAddress: "mn_contract_preview1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqlhvjal",
     indexerUrl: "https://indexer.preview.midnight.network/api/v1/graphql",
     nodeUrl: "https://rpc.preview.midnight.network",
     explorerUrl: "https://explorer.preview.midnight.network"
