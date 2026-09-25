@@ -1,5 +1,18 @@
 # VeilCircle 🛡️ — Anonymous & Zero-Knowledge Peer Health Support Networks
 
+<p align="center">
+  <img src="screenshots/contract_deployment.svg" alt="VeilCircle Midnight Contract Deployment" width="85%" style="border-radius: 12px; box-shadow: 0 20px 60px rgba(0,242,254,0.3);" />
+</p>
+
+<p align="center">
+  <strong>✨ LIVE ON MIDNIGHT BLOCKCHAIN ✨</strong><br/>
+  <a href="https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02">
+    <code>0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02</code>
+  </a>
+</p>
+
+---
+
 [![Live Deployment](https://img.shields.io/badge/Live_DApp-veil--circle.vercel.app-00F2FE?style=for-the-badge&logo=vercel&logoColor=white)](https://veil-circle.vercel.app/)
 [![Midnight Blockchain](https://img.shields.io/badge/Blockchain-Midnight_Preprod-006948?style=for-the-badge&logo=blockchain)](https://midnight.network)
 [![Smart Contract](https://img.shields.io/badge/Language-Compact_0.19-7928CA?style=for-the-badge)](https://docs.midnight.network)
@@ -16,6 +29,8 @@
 > [!IMPORTANT]
 > # 🚀 PROVEN ON-CHAIN: Live Midnight Preprod Smart Contract Deployment
 > 
+> **Successfully deployed VeilCircle Compact contract with 4 zero-knowledge circuits!**
+> 
 > ```
 > 📍 Contract Address:  0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02
 > 🔗 Transaction Hash:   0x6193246854e40f7e97835eb6a146a4b73569586aab90fb165e1a2b2214b97ff5
@@ -23,13 +38,31 @@
 > 📜 Language & Engine:  Compact 0.19 • BLS12-381 ZK-SNARK Prover
 > 🔍 Explorer URL:       https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02
 > 📁 Deployment Record:  contract/deployments/preprod.json
+> 
+> ✅ 4 Circuits Deployed: createCircle, registerCredentialCommitment, proveAndJoinCircle, isNullifierSpent
+> ✅ 4 Initial Support Circles Initialized
+> ✅ ZK Proof Verification Active On-Chain
 > ```
+
+---
+
+### 📸 **Deployment Terminal Screenshot — Real Midnight Network Deployment**
 
 <p align="center">
   <a href="https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02">
-    <img src="screenshots/contract_deployment.png" alt="VeilCircle Midnight Preprod Contract Deployment Terminal" width="100%" style="border-radius: 14px; border: 2px solid #006948; box-shadow: 0 12px 30px rgba(0,105,72,0.3);" />
+    <img src="https://raw.githubusercontent.com/shritesh263/-VeilCircle-/main/screenshots/contract_deployment.svg" alt="VeilCircle Midnight Preprod Contract Deployment - Terminal Output" width="100%" style="border-radius: 12px; border: 3px solid #00F2FE; box-shadow: 0 20px 60px rgba(0,242,254,0.4); margin: 20px 0;" />
   </a>
 </p>
+
+<p align="center">
+  <em>👆 Click to view contract on Midnight Explorer | 
+  <a href="contract/deployments/preprod.json">View Deployment Artifact</a> | 
+  <a href="DEPLOYMENT_GUIDE.md">Deploy Your Own</a></em>
+</p>
+
+---
+
+### 🔗 **Quick Links & Resources**
 
 | Resource | URL / Address | Description | Status |
 | :--- | :--- | :--- | :--- |
