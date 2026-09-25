@@ -14,14 +14,21 @@
 ## 🌐 Live Deployments & Network Details
 
 > [!IMPORTANT]
-> ### 🚀 Live Midnight Preprod Smart Contract Deployment
-> **Contract Address**: [`0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02`](https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02)  
-> **Transaction Hash**: `0x6193246854e40f7e97835eb6a146a4b73569586aab90fb165e1a2b2214b97ff5`  
-> **Network**: `Midnight Preprod Testnet` | **Language**: `Compact 0.19` | **Proving Engine**: `BLS12-381 ZK-SNARK`  
-> **Deployment Artifact**: `contract/deployments/preprod.json`
+> # 🚀 PROVEN ON-CHAIN: Live Midnight Preprod Smart Contract Deployment
+> 
+> ```
+> 📍 Contract Address:  0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02
+> 🔗 Transaction Hash:   0x6193246854e40f7e97835eb6a146a4b73569586aab90fb165e1a2b2214b97ff5
+> 🌐 Network:            Midnight Preprod Testnet
+> 📜 Language & Engine:  Compact 0.19 • BLS12-381 ZK-SNARK Prover
+> 🔍 Explorer URL:       https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02
+> 📁 Deployment Record:  contract/deployments/preprod.json
+> ```
 
 <p align="center">
-  <img src="screenshots/contract_deployment.png" alt="VeilCircle Midnight Preprod Contract Deployment Terminal" width="95%" style="border-radius: 12px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5);" />
+  <a href="https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02">
+    <img src="screenshots/contract_deployment.png" alt="VeilCircle Midnight Preprod Contract Deployment Terminal" width="100%" style="border-radius: 14px; border: 2px solid #006948; box-shadow: 0 12px 30px rgba(0,105,72,0.3);" />
+  </a>
 </p>
 
 | Resource | URL / Address | Description | Status |
