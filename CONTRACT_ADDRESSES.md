@@ -12,19 +12,13 @@ The contract addresses in this repository use **placeholder/example addresses** 
 
 ---
 
-## Current Placeholder Addresses
+## Current Deployed Contract Address
 
-### Preprod Testnet
+### Preprod Testnet (Primary)
 ```
-mn_contract_preprod1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpzs0ku
+0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02
 ```
-**Explorer**: https://explorer.preprod.midnight.network/contracts/mn_contract_preprod1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpzs0ku
-
-### Preview Testnet
-```
-mn_contract_preview1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqlhvjal
-```
-**Explorer**: https://explorer.preview.midnight.network/contracts/mn_contract_preview1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqlhvjal
+**Explorer**: https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02
 
 ---
 

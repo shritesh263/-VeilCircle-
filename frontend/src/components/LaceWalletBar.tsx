@@ -13,6 +13,7 @@ interface LaceWalletBarProps {
   onConnect: (provider?: WalletProvider) => void;
   onDisconnect: () => void;
   onOpenAccountTab?: () => void;
+  onOpenModal?: () => void;
 }
 
 export const LaceWalletBar: React.FC<LaceWalletBarProps> = ({
@@ -23,7 +24,8 @@ export const LaceWalletBar: React.FC<LaceWalletBarProps> = ({
   walletProvider = '1AM',
   onConnect,
   onDisconnect,
-  onOpenAccountTab
+  onOpenAccountTab,
+  onOpenModal
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -45,6 +47,14 @@ export const LaceWalletBar: React.FC<LaceWalletBarProps> = ({
   const handleSelectWallet = (provider: WalletProvider) => {
     setModalOpen(false);
     onConnect(provider);
+  };
+
+  const handleOpenConnectModal = () => {
+    if (onOpenModal) {
+      onOpenModal();
+    } else {
+      setModalOpen(true);
+    }
   };
 
   return (
@@ -88,7 +98,7 @@ export const LaceWalletBar: React.FC<LaceWalletBarProps> = ({
 
       {!walletConnected ? (
         <button
-          onClick={() => setModalOpen(true)}
+          onClick={handleOpenConnectModal}
           disabled={isConnecting}
           className="flex items-center gap-2.5 px-4 py-2 bg-primary hover:bg-primary-container text-on-primary rounded-xl transition-all shadow-[0_1px_3px_0_rgba(15,23,42,0.06)] hover:shadow-md active:scale-[0.98] cursor-pointer disabled:opacity-50"
           type="button"
@@ -97,7 +107,7 @@ export const LaceWalletBar: React.FC<LaceWalletBarProps> = ({
             {walletProvider === '1AM' ? '⚡' : '🪢'}
           </div>
           <span className="font-semibold text-xs tracking-tight">
-            {isConnecting ? 'Connecting Wallet...' : 'Connect Wallet (Lace / 1AM)'}
+            {isConnecting ? 'Connecting Wallet...' : 'Connect Wallet (1AM / Lace)'}
           </span>
         </button>
       ) : (
@@ -209,13 +219,13 @@ export const LaceWalletBar: React.FC<LaceWalletBarProps> = ({
                 <button
                   onClick={() => {
                     setPopoverOpen(false);
-                    setModalOpen(true);
+                    handleOpenConnectModal();
                   }}
                   className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-surface-container-low text-on-surface hover:bg-surface-container font-semibold text-xs transition-all cursor-pointer border border-surface-container"
                   type="button"
                 >
                   <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
-                  Switch Wallet (Lace / 1AM)
+                  Switch Wallet (1AM / Lace)
                 </button>
 
                 <button
@@ -237,8 +247,8 @@ export const LaceWalletBar: React.FC<LaceWalletBarProps> = ({
 
       {/* Interactive Wallet Selection Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-6 border border-surface-container shadow-2xl space-y-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-md bg-surface-container-lowest rounded-3xl p-6 sm:p-7 border border-surface-container shadow-2xl space-y-5 my-auto max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-surface-container pb-3">
               <div>
                 <h3 className="font-bold text-base text-on-surface">Select Wallet Connection</h3>

@@ -16,7 +16,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   walletState,
-  onOpenWalletModal: _onOpenWalletModal,
+  onOpenWalletModal,
   onDisconnectWallet,
   onConnectWalletProvider,
   activeTab,
@@ -170,6 +170,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               onDisconnect={onDisconnectWallet}
               onOpenAccountTab={() => setActiveTab("account")}
+              onOpenModal={onOpenWalletModal}
             />
           </div>
         </div>

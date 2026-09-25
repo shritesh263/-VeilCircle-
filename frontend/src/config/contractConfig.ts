@@ -10,16 +10,16 @@ export interface ContractConfig {
 
 /**
  * Validates if a contract address string matches valid Midnight or EVM address format:
+ * - Standard Midnight Bech32 contract address (mn_contract1..., mn_contract_preprod1..., mn_contract_preview1..., mn_test1...)
  * - Standard 32-byte Midnight contract address (0x + 64 hex chars or 64 hex chars without 0x)
  * - Standard 20-byte EVM address (0x + 40 hex chars or 40 hex chars)
- * - Standard Midnight Bech32 contract address (mn_contract1... or mn_test1...)
  */
 export function isValidContractAddress(address: string | undefined | null): boolean {
   if (!address || typeof address !== 'string') return false;
   const trimmed = address.trim();
   
-  // 1. Bech32 Midnight address format (mn_contract1... or mn_test1...)
-  if (/^(mn_contract1|mn_test1|addr1)[a-zA-Z0-9]{30,90}$/.test(trimmed)) {
+  // 1. Bech32 Midnight address format (mn_contract1..., mn_contract_preprod1..., mn_contract_preview1..., mn_test1...)
+  if (/^(mn_contract1|mn_contract_preprod1|mn_contract_preview1|mn_test1|addr1)[a-zA-Z0-9]{20,90}$/.test(trimmed)) {
     return true;
   }
 
@@ -38,7 +38,7 @@ export function isValidContractAddress(address: string | undefined | null): bool
 
 /**
  * Loads the VeilCircle contract configuration from environment variables or defaults.
- * Uses a valid 32-byte (64 hex characters) Midnight Preprod contract address.
+ * Uses a valid Midnight Preprod contract address.
  */
 export function getContractConfig(): ContractConfig {
   const meta = typeof import.meta !== 'undefined' ? (import.meta as any) : undefined;
@@ -46,7 +46,7 @@ export function getContractConfig(): ContractConfig {
     meta?.env?.VITE_CONTRACT_ADDRESS ||
     meta?.env?.NEXT_PUBLIC_CONTRACT_ADDRESS ||
     (typeof process !== 'undefined' ? (process.env as any)?.VITE_CONTRACT_ADDRESS || (process.env as any)?.NEXT_PUBLIC_CONTRACT_ADDRESS : undefined) ||
-    '0x02a7b8e9f1c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9';
+    '0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02';
 
   const network =
     meta?.env?.VITE_NETWORK ||
@@ -61,7 +61,7 @@ export function getContractConfig(): ContractConfig {
   if (!cleanAddress) {
     errorMessage = 'VeilCircle contract address is not configured. Please set VITE_CONTRACT_ADDRESS in environment variables.';
   } else if (!isValid) {
-    errorMessage = `VeilCircle contract address "${cleanAddress}" is invalid. Expected a 64-character Midnight hex hash or mn_contract1... address.`;
+    errorMessage = `VeilCircle contract address "${cleanAddress}" is invalid. Expected a valid Midnight contract address (64-character hex hash or Bech32 address).`;
   }
 
   const explorerUrl = `https://explorer.${network}.midnight.network/contract/${cleanAddress}`;

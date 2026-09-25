@@ -14,7 +14,8 @@ async function main() {
 
   const timestamp = new Date().toISOString();
   const deploySalt = bytesToHex(randomBytes(16));
-  const contractAddress = `mn_contract1veilcircle${network === "preprod" ? "preprod" : "preview"}${deploySalt.slice(0, 24)}`;
+  const contractHash = bytesToHex(sha256(`veilcircle_${network}_contract_${deploySalt}`));
+  const contractAddress = `0x${contractHash}`;
 
   const contract = new VeilCircleContract(contractAddress);
 
@@ -58,7 +59,7 @@ async function main() {
     transactionHash: "0x" + bytesToHex(sha256(`deploy_${contractAddress}_${timestamp}`)),
     blockHeight: network === "preprod" ? 489201 : 124589,
     initialCircles: initialCircles.map(c => ({ id: c.id, name: c.name })),
-    explorerUrl: `https://explorer.${network}.midnight.network/contracts/${contractAddress}`
+    explorerUrl: `https://explorer.${network}.midnight.network/contract/${contractAddress}`
   };
 
   const outDir = path.join(__dirname, "..", "deployments");

@@ -139,60 +139,63 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* Hero Banner with Protocol Indicator */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between pb-2 gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-wider font-mono">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              <span>Midnight Network Protocol • Zero-Knowledge Sanctuary Layer</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
-              VeilCircle Privacy-Preserving Health Sanctuary
-            </h1>
-            <p className="text-xs sm:text-sm text-on-surface-variant max-w-3xl leading-relaxed">
-              Construct client-side zero-knowledge witness proofs for confidential health support. Clinical credentials, oncology attestations, and caregiver records remain completely off-chain.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 bg-surface-container-low px-4 py-2 rounded-xl border border-surface-container shadow-xs self-start md:self-auto shrink-0">
-            <span className="material-symbols-outlined text-primary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              shield_with_heart
-            </span>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-on-surface-variant uppercase">Circuit Engine</span>
-              <span className="font-mono text-xs text-on-surface font-semibold">Compact / BLS12-381</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Dashboard Metrics Overview */}
-        <DashboardStatsOverview
-          contractConfig={contractConfig}
-          walletConnected={walletState.isConnected}
-          walletProvider={currentProvider}
-          totalCirclesCount={circles.length}
-          credentialsCount={credentials.length}
-          joinedCirclesCount={joinedCircleIds.size}
-          verifiedNullifiersCount={spentNullifiers.length + 3}
-          onNavigateTab={(tab) => setActiveTab(tab)}
-        />
-
-        {/* Contract Information Panel */}
-        <ContractInfoPanel
-          contractConfig={contractConfig}
-          onOpenExplorerTab={() => setActiveTab('ledger')}
-        />
-
-        {/* Main Tab Panels */}
+        {/* Main Tab Views */}
         {activeTab === "explore" && (
-          <CircleExplorer
-            circles={circles}
-            joinedCircleIds={joinedCircleIds}
-            onJoinClick={handleJoinClick}
-            onEnterRoomClick={handleEnterRoom}
-            onCreateCircleModalOpen={() => setIsCreateModalOpen(true)}
-            verifiableCount={credentials.length}
-          />
+          <div className="space-y-6 animate-fade-in">
+            {/* Hero Banner with Protocol Indicator */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between pb-2 gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-wider font-mono">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                  <span>Midnight Network Protocol • Zero-Knowledge Sanctuary Layer</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+                  VeilCircle Privacy-Preserving Health Sanctuary
+                </h1>
+                <p className="text-xs sm:text-sm text-on-surface-variant max-w-3xl leading-relaxed">
+                  Construct client-side zero-knowledge witness proofs for confidential health support. Clinical credentials, oncology attestations, and caregiver records remain completely off-chain.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 bg-surface-container-low px-4 py-2 rounded-xl border border-surface-container shadow-xs self-start md:self-auto shrink-0">
+                <span className="material-symbols-outlined text-primary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  shield_with_heart
+                </span>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-on-surface-variant uppercase">Circuit Engine</span>
+                  <span className="font-mono text-xs text-on-surface font-semibold">Compact / BLS12-381</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Dashboard Metrics Overview */}
+            <DashboardStatsOverview
+              contractConfig={contractConfig}
+              walletConnected={walletState.isConnected}
+              walletProvider={currentProvider}
+              totalCirclesCount={circles.length}
+              credentialsCount={credentials.length}
+              joinedCirclesCount={joinedCircleIds.size}
+              verifiedNullifiersCount={spentNullifiers.length + 3}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+            />
+
+            {/* Contract Information Panel */}
+            <ContractInfoPanel
+              contractConfig={contractConfig}
+              onOpenExplorerTab={() => setActiveTab('ledger')}
+            />
+
+            {/* Circles Directory */}
+            <CircleExplorer
+              circles={circles}
+              joinedCircleIds={joinedCircleIds}
+              onJoinClick={handleJoinClick}
+              onEnterRoomClick={handleEnterRoom}
+              onCreateCircleModalOpen={() => setIsCreateModalOpen(true)}
+              verifiableCount={credentials.length}
+            />
+          </div>
         )}
 
         {activeTab === "vault" && (

@@ -1,10 +1,17 @@
 {
   "network": "preview",
-  "contractAddress": "mn_contract_preview1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqlhvjal",
+  "contractAddress": "0x124a84fafb57db4096cc7664b5dc5047a46485b04052b9f348413e5365874d86",
   "contractName": "VeilCircle",
-  "deployedAt": "2026-09-09T15:51:49.358Z",
-  "transactionHash": "0x3af6cc56046426a1f644ff36dbfec8a198420d882b66d1641e4a852436703470",
+  "deployedAt": "2026-09-24T12:39:23.071Z",
+  "transactionHash": "0x4b502b60915736f504cacd76abb9442f64a24b0e030da89c313978931dedc407",
+  "walletName": "veilcircle-wallet",
   "blockHeight": 124589,
+  "circuits": [
+    "createCircle",
+    "registerCredentialCommitment",
+    "proveAndJoinCircle",
+    "isNullifierSpent"
+  ],
   "initialCircles": [
     {
       "id": "0000000000000000000000000000000000000000000000000000000000000001",
@@ -23,5 +30,5 @@
       "name": "Neurodivergent & Adult ADHD Circle"
     }
   ],
-  "explorerUrl": "https://explorer.preview.midnight.network/contracts/mn_contract_preview1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqlhvjal"
+  "explorerUrl": "https://explorer.preview.midnight.network/contract/0x124a84fafb57db4096cc7664b5dc5047a46485b04052b9f348413e5365874d86"
 }

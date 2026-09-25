@@ -101,8 +101,8 @@ export const LaceWalletModal: React.FC<LaceWalletModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/60 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-lg p-6 sm:p-8 bg-surface-container-lowest border border-surface-container rounded-3xl shadow-2xl shadow-primary/10 my-6 transition-all">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in overflow-y-auto">
+      <div className="relative w-full max-w-lg p-6 sm:p-7 bg-surface-container-lowest border border-surface-container rounded-3xl shadow-2xl my-auto max-h-[92vh] overflow-y-auto transition-all">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -115,16 +115,16 @@ export const LaceWalletModal: React.FC<LaceWalletModalProps> = ({
         {/* Dynamic Modal View: Next Steps Window vs Wallets List */}
         {stage === "idle" ? (
           /* STAGE 1: WALLET SELECTION */
-          <div>
+          <div className="space-y-4">
             {/* Modal Header */}
-            <div className="flex items-center gap-3.5 mb-5">
-              <div className="w-12 h-12 rounded-2xl bg-primary-fixed flex items-center justify-center text-primary shadow-xs">
+            <div className="flex items-center gap-3.5 pb-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary-fixed flex items-center justify-center text-primary shadow-xs shrink-0">
                 <span className="material-symbols-outlined text-[26px]">account_balance_wallet</span>
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-primary font-mono bg-primary-fixed/40 px-2 py-0.5 rounded-full">
-                    Midnight DApp Connector API
+                    Midnight DApp Connector
                   </span>
                   <span className="text-[10px] font-mono text-secondary bg-secondary-fixed px-2 py-0.5 rounded-full uppercase font-bold">
                     {network}
@@ -132,153 +132,138 @@ export const LaceWalletModal: React.FC<LaceWalletModalProps> = ({
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-on-surface mt-1">Connect Midnight Wallet</h3>
                 <p className="text-xs text-on-surface-variant font-medium">
-                  Trigger native browser extension approval popup within seconds
+                  Select your wallet to authenticate zero-knowledge proofs
                 </p>
               </div>
             </div>
 
-            {/* Discovered Extensions */}
-            {wallets.length > 0 ? (
-              <div className="space-y-3">
-                <p className="text-xs text-on-surface-variant mb-2 leading-relaxed">
-                  Select your installed wallet. Clicking will instantly launch the extension authorization popup:
-                </p>
-
-                {wallets.map((wallet) => {
-                  const is1AM = wallet.is1AM || /1am/i.test(wallet.name) || /1am/i.test(wallet.rdns);
-                  const isSandbox = wallet.id === "sandbox";
-
-                  return (
-                    <div
-                      key={wallet.rdns}
-                      onClick={() => handleConnectWallet(wallet)}
-                      className={`p-4 rounded-2xl border transition-all shadow-xs cursor-pointer flex items-center justify-between gap-3 ${
-                        isSandbox
-                          ? "border-secondary/30 bg-surface-container-lowest hover:bg-secondary-fixed/20"
-                          : "border-primary/30 bg-surface-container-low hover:bg-surface-container hover:border-primary"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-12 h-12 rounded-2xl bg-surface-container-lowest border border-surface-container flex items-center justify-center shadow-xs shrink-0 overflow-hidden text-2xl">
-                          {wallet.icon ? (
-                            <img
-                              src={wallet.icon}
-                              alt={wallet.name}
-                              className="w-8 h-8 rounded-lg object-contain"
-                              onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).style.display = "none";
-                              }}
-                            />
-                          ) : is1AM ? (
-                            "⚡"
-                          ) : isSandbox ? (
-                            "🧪"
-                          ) : (
-                            "🪢"
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-bold text-sm text-on-surface truncate">{wallet.name}</h4>
-                            <span
-                              className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                                isSandbox
-                                  ? "bg-secondary-fixed text-on-secondary-fixed-variant"
-                                  : "bg-primary-fixed text-on-primary-fixed-variant"
-                              }`}
-                            >
-                              {isSandbox ? "Instant Testnet" : "Live Extension"}
-                            </span>
-                          </div>
-                          <p className="text-[11px] font-mono text-on-surface-variant mt-0.5 truncate">
-                            {wallet.rdns}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Action Button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleConnectWallet(wallet);
-                        }}
-                        className="px-4 py-2.5 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-container shadow-xs transition-transform active:scale-95 flex items-center gap-1.5 shrink-0"
-                      >
-                        <span>Connect</span>
-                        <span className="material-symbols-outlined text-[16px]">bolt</span>
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Honest Empty State: No Extension Installed */
-              <div className="space-y-4">
-                <div className="p-5 rounded-2xl bg-surface-container-low border border-surface-container text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-surface-container-lowest mx-auto flex items-center justify-center text-on-surface-variant mb-3 border border-surface-container">
-                    <span className="material-symbols-outlined text-[26px]">extension_off</span>
+            {/* Wallet Selection Options */}
+            <div className="space-y-3 pt-1">
+              {/* Option 1: 1AM Midnight Wallet */}
+              <div
+                onClick={() => handleConnectWallet("1am")}
+                className="p-4 rounded-2xl border border-primary/30 bg-surface-container-low hover:bg-surface-container hover:border-primary transition-all shadow-xs cursor-pointer flex items-center justify-between gap-3 group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 h-12 rounded-2xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center shadow-xs shrink-0 text-2xl group-hover:scale-105 transition-transform">
+                    ⚡
                   </div>
-                  <h4 className="font-bold text-sm text-on-surface">No Midnight Wallet Detected</h4>
-                  <p className="text-xs text-on-surface-variant mt-1 max-w-sm mx-auto leading-relaxed">
-                    Install 1AM or Lace to connect, or use Instant Sandbox mode to test right away:
-                  </p>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-bold text-sm text-on-surface">1AM Midnight Wallet</h4>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant">
+                        Midnight ZK
+                      </span>
+                    </div>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      Native Midnight Zero-Knowledge Witness Custody &amp; Proofs
+                    </p>
+                  </div>
                 </div>
-
-                <div className="space-y-2.5">
-                  {/* 1AM Wallet Install Link */}
-                  <div className="p-3.5 rounded-2xl border border-surface-container bg-surface-container-lowest flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-xl shrink-0">
-                        ⚡
-                      </div>
-                      <div>
-                        <h5 className="font-bold text-xs text-on-surface">1AM Midnight Wallet</h5>
-                        <p className="text-[11px] text-on-surface-variant">Built for Midnight ZK proofs &amp; contracts</p>
-                      </div>
-                    </div>
-                    <a
-                      href="https://1am.xyz"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-primary text-on-primary hover:bg-primary-container text-xs font-bold transition-colors flex items-center gap-1 shrink-0"
-                    >
-                      <span>Install 1AM</span>
-                      <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-                    </a>
-                  </div>
-
-                  {/* Midnight Lace Install Link */}
-                  <div className="p-3.5 rounded-2xl border border-surface-container bg-surface-container-lowest flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-xl shrink-0">
-                        🪢
-                      </div>
-                      <div>
-                        <h5 className="font-bold text-xs text-on-surface">Midnight Lace Wallet</h5>
-                        <p className="text-[11px] text-on-surface-variant">Official Lace edition for Midnight</p>
-                      </div>
-                    </div>
-                    <a
-                      href="https://www.lace.io"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold transition-colors flex items-center gap-1 shrink-0"
-                    >
-                      <span>Install Lace</span>
-                      <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-                    </a>
-                  </div>
-
-                  {/* Instant Sandbox Option */}
-                  <button
-                    onClick={handleSelectSandbox}
-                    className="w-full p-3 rounded-2xl border border-secondary/40 bg-secondary-fixed/20 hover:bg-secondary-fixed/40 text-on-surface text-xs font-bold flex items-center justify-center gap-2 transition-all"
-                  >
-                    <span>🧪 Continue with Instant Testnet Sandbox</span>
-                  </button>
-                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConnectWallet("1am");
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-container shadow-xs transition-transform active:scale-95 flex items-center gap-1 shrink-0"
+                >
+                  <span>Connect</span>
+                  <span className="material-symbols-outlined text-[15px]">bolt</span>
+                </button>
               </div>
-            )}
+
+              {/* Option 2: Midnight Lace Wallet */}
+              <div
+                onClick={() => handleConnectWallet("lace")}
+                className="p-4 rounded-2xl border border-surface-container bg-surface-container-low hover:bg-surface-container hover:border-secondary transition-all shadow-xs cursor-pointer flex items-center justify-between gap-3 group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 h-12 rounded-2xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shadow-xs shrink-0 text-2xl group-hover:scale-105 transition-transform">
+                    🪢
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-bold text-sm text-on-surface">Midnight Lace Wallet</h4>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant">
+                        CIP-30 / DApp API
+                      </span>
+                    </div>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      Official IOHK Light Wallet for Midnight &amp; Cardano
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConnectWallet("lace");
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-secondary text-on-secondary hover:bg-secondary-container shadow-xs transition-transform active:scale-95 flex items-center gap-1 shrink-0"
+                >
+                  <span>Connect</span>
+                  <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+                </button>
+              </div>
+
+              {/* Option 3: Instant Testnet Sandbox */}
+              <div
+                onClick={handleSelectSandbox}
+                className="p-4 rounded-2xl border border-secondary/30 bg-surface-container-lowest hover:bg-secondary-fixed/20 transition-all shadow-xs cursor-pointer flex items-center justify-between gap-3 group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center shadow-xs shrink-0 text-2xl group-hover:scale-105 transition-transform">
+                    🧪
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="font-bold text-sm text-on-surface">Instant Testnet Sandbox</h4>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                        Zero Install Required
+                      </span>
+                    </div>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      Pre-funded with 1,450.00 tDUST &amp; 25.00 NIGHT for instant testing
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectSandbox();
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-surface-container hover:bg-surface-container-high text-on-surface shadow-xs transition-transform active:scale-95 flex items-center gap-1 shrink-0"
+                >
+                  <span>Launch</span>
+                  <span className="material-symbols-outlined text-[15px]">play_arrow</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Install Extension Helpful Badges */}
+            <div className="pt-2 border-t border-surface-container flex items-center justify-between text-xs text-on-surface-variant flex-wrap gap-2">
+              <span className="text-[11px]">Need to install an extension?</span>
+              <div className="flex items-center gap-3">
+                <a
+                  href="https://1am.xyz"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline font-bold text-[11px] flex items-center gap-0.5"
+                >
+                  <span>Get 1AM</span>
+                  <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+                </a>
+                <span className="text-surface-container-high">•</span>
+                <a
+                  href="https://www.lace.io"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline font-bold text-[11px] flex items-center gap-0.5"
+                >
+                  <span>Get Lace</span>
+                  <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+                </a>
+              </div>
+            </div>
           </div>
         ) : (
           /* STAGE 2: NEXT STEPS WINDOW */

@@ -42,7 +42,7 @@ export class VeilCircleContract {
   public address: string;
 
   constructor(address?: string) {
-    this.address = address || "mn_contract1veilcircle" + bytesToHex(sha256("veilcircle_v1")).slice(0, 38);
+    this.address = address || "0x" + bytesToHex(sha256("veilcircle_v1_midnight_preprod"));
   }
 
   /**
