@@ -173,15 +173,19 @@ VeilCircle features native, multi-wallet connectivity compliant with the officia
    - Instant, pre-funded testnet environment with **850.00 tDUST** and **25.00 NIGHT**.
    - Allows instant hands-on evaluation of all ZK proofs, circles, and settlement without requiring extension setup.
 
-### 🚀 Interactive "Next Steps" Window
-When connecting via 1AM or Lace, VeilCircle immediately launches the extension popup and opens a real-time **Next Steps Window**:
-- **Step 1: Check Extension Popup** — Live pulsing indicator confirming popup launch.
-- **Step 2: Unlock Your Wallet** — Prompts for password/PIN if the extension was locked.
-- **Step 3: Click "Approve" / "Authorize"** — Connects without exposing private keys.
-- **Re-trigger Helper** — 1-click button to re-open popup if minimized or blocked.
+### 🚀 Interactive Multi-Wallet Handshake & Native 1AM Integration
+When connecting via 1AM or Lace, VeilCircle immediately triggers the browser extension authorization popup:
+- **Connection Approval**: 1-click extension authorization handshake on Midnight Preprod testnet.
+- **Shielded Holdings & Enclave**: View live shielded and unshielded balances (`NIGHT` & `tDUST`).
+- **Cryptographic Session**: Real-time CIP-30 / DApp connector protocol with `ZK_MEMBERSHIP_JOIN` scope.
 
 <p align="center">
-  <img src="screenshot/v14.png" alt="Multi-Wallet Connection & Next Steps Window" width="85%" />
+  <img src="screenshots/1am_connection_request.png" alt="1AM Connection Request Handshake Popup" width="49%" style="border-radius: 10px; border: 1px solid #334155;" />
+  <img src="screenshots/1am_wallet_balance.png" alt="1AM Extension Holdings & Balances" width="49%" style="border-radius: 10px; border: 1px solid #334155;" />
+</p>
+
+<p align="center">
+  <img src="screenshots/1am_connected_dashboard.png" alt="VeilCircle Active Dashboard with 1AM Connected" width="98%" style="border-radius: 10px; border: 1px solid #334155;" />
 </p>
 
 ---
@@ -228,8 +232,12 @@ Automated relayer sponsorship through Midnight Compact smart contracts with inst
 
 ---
 
-### 5. 🌿 Anonymous Peer Sanctuary Room
-Join ephemeral peer support rooms with end-to-end client blinded pseudonyms and zero tracking.
+### 5. 🌿 Anonymous Peer Sanctuary Room & Real-Time Ephemeral Chat
+Join ephemeral peer support rooms with end-to-end client blinded pseudonyms, zero tracking, and ZK-verified attendee badges.
+
+<p align="center">
+  <img src="screenshots/sanctuary_live_chat.png" alt="Live Anonymous Peer Sanctuary with ZK-Verified Participants" width="98%" style="border-radius: 10px; border: 1px solid #334155;" />
+</p>
 
 <p align="center">
   <img src="screenshot/v8.png" alt="Peer Sanctuary Room Overview" width="49%" />
