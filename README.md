@@ -1,21 +1,6 @@
 # VeilCircle 🛡️ — Anonymous & Zero-Knowledge Peer Health Support Networks
 
-<p align="center">
-  <img src="screenshots/contract_deployment.png" alt="VeilCircle Deployment - Initial Circuits" width="100%" style="border-radius: 12px; box-shadow: 0 20px 60px rgba(0,242,254,0.3); margin-bottom: 20px;" />
-</p>
 
-<p align="center">
-  <img src="screenshots/midnight_preprod_contract_deployment.png" alt="VeilCircle Deployment - Contract Details" width="100%" style="border-radius: 12px; box-shadow: 0 20px 60px rgba(0,242,254,0.3);" />
-</p>
-
-<p align="center">
-  <strong>✨ LIVE ON MIDNIGHT BLOCKCHAIN ✨</strong><br/>
-  <a href="https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897">
-    <code>Contract Address: 06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897</code>
-  </a>
-</p>
-
----
 
 [![Live Deployment](https://img.shields.io/badge/Live_DApp-veil--circle.vercel.app-00F2FE?style=for-the-badge&logo=vercel&logoColor=white)](https://veil-circle.vercel.app/)
 [![Midnight Blockchain](https://img.shields.io/badge/Blockchain-Midnight_Preview-006948?style=for-the-badge&logo=blockchain)](https://midnight.network)
@@ -40,12 +25,6 @@
 > 🔍 Explorer URL:       https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897
 > 📁 Deployment Record:  contract/deployments/preview.json
 > ```
-
-<p align="center">
-  <a href="https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897">
-    <img src="screenshots/contract_deployment.png" alt="VeilCircle Midnight Preview Contract Deployment Terminal" width="100%" style="border-radius: 14px; border: 2px solid #006948; box-shadow: 0 12px 30px rgba(0,105,72,0.3);" />
-  </a>
-</p>
 
 | Resource | URL / Address | Description | Status |
 | :--- | :--- | :--- | :--- |
