@@ -10,18 +10,15 @@
 
 <p align="center">
   <strong>✨ LIVE ON MIDNIGHT BLOCKCHAIN ✨</strong><br/>
-  <a href="https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02">
-    <code>Contract Address: 0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02</code>
-  </a><br/>
-  <a href="https://explorer.preprod.midnight.network/tx/0x6193246854e40f7e97835eb6a146a4b73569586aab90fb165e1a2b2214b97ff5">
-    <code>Tx Hash: 0x6193246854e40f7e97835eb6a146a4b73569586aab90fb165e1a2b2214b97ff5</code>
+  <a href="https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897">
+    <code>Contract Address: 06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897</code>
   </a>
 </p>
 
 ---
 
 [![Live Deployment](https://img.shields.io/badge/Live_DApp-veil--circle.vercel.app-00F2FE?style=for-the-badge&logo=vercel&logoColor=white)](https://veil-circle.vercel.app/)
-[![Midnight Blockchain](https://img.shields.io/badge/Blockchain-Midnight_Preprod-006948?style=for-the-badge&logo=blockchain)](https://midnight.network)
+[![Midnight Blockchain](https://img.shields.io/badge/Blockchain-Midnight_Preview-006948?style=for-the-badge&logo=blockchain)](https://midnight.network)
 [![Smart Contract](https://img.shields.io/badge/Language-Compact_0.19-7928CA?style=for-the-badge)](https://docs.midnight.network)
 [![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-Passing-22C55E?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/shritesh263/-VeilCircle-/actions)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
@@ -34,30 +31,29 @@
 ## 🌐 Live Deployments & Network Details
 
 > [!IMPORTANT]
-> # 🚀 PROVEN ON-CHAIN: Live Midnight Preprod Smart Contract Deployment
+> # 🚀 PROVEN ON-CHAIN: Live Midnight Preview Smart Contract Deployment
 > 
 > ```
-> 📍 Contract Address:  0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02
-> 🔗 Transaction Hash:   0x6193246854e40f7e97835eb6a146a4b73569586aab90fb165e1a2b2214b97ff5
-> 🌐 Network:            Midnight Preprod Testnet
+> 📍 Contract Address:  06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897
+> 🌐 Network:            Midnight Preview Testnet
 > 📜 Language & Engine:  Compact 0.19 • BLS12-381 ZK-SNARK Prover
-> 🔍 Explorer URL:       https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02
-> 📁 Deployment Record:  contract/deployments/preprod.json
+> 🔍 Explorer URL:       https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897
+> 📁 Deployment Record:  contract/deployments/preview.json
 > ```
 
 <p align="center">
-  <a href="https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02">
-    <img src="screenshots/contract_deployment.png" alt="VeilCircle Midnight Preprod Contract Deployment Terminal" width="100%" style="border-radius: 14px; border: 2px solid #006948; box-shadow: 0 12px 30px rgba(0,105,72,0.3);" />
+  <a href="https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897">
+    <img src="screenshots/contract_deployment.png" alt="VeilCircle Midnight Preview Contract Deployment Terminal" width="100%" style="border-radius: 14px; border: 2px solid #006948; box-shadow: 0 12px 30px rgba(0,105,72,0.3);" />
   </a>
 </p>
 
 | Resource | URL / Address | Description | Status |
 | :--- | :--- | :--- | :--- |
 | 🚀 **Live Web DApp** | [https://veil-circle.vercel.app/](https://veil-circle.vercel.app/) | Official Production Vercel Deployment | 🟢 **Live & Active** |
-| 🛡️ **Midnight Preprod Contract** | [`0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02`](https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02) | Primary Preprod Testnet Smart Contract | 🟢 **Deployed & Active** |
-| 🔍 **Preprod Explorer** | [explorer.preprod.midnight.network/contract/...](https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02) | On-Chain Contract & Ledger Explorer | 🟢 **Online** |
-| ⚡ **Midnight Indexer API** | `https://indexer.preprod.midnight.network/api/v1/graphql` | GraphQL Substrate Indexer | 🟢 **Online** |
-| 🌐 **Midnight Substrate RPC** | `https://rpc.preprod.midnight.network` | Remote Node RPC Endpoint | 🟢 **Online** |
+| 🛡️ **Midnight Preview Contract** | [`06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897`](https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897) | Primary Preview Testnet Smart Contract | 🟢 **Deployed & Active** |
+| 🔍 **Preview Explorer** | [explorer.preview.midnight.network/contract/...](https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897) | On-Chain Contract & Ledger Explorer | 🟢 **Online** |
+| ⚡ **Midnight Indexer API** | `https://indexer.preview.midnight.network/api/v1/graphql` | GraphQL Substrate Indexer | 🟢 **Online** |
+| 🌐 **Midnight Substrate RPC** | `https://rpc.preview.midnight.network` | Remote Node RPC Endpoint | 🟢 **Online** |
 
 ### 📋 Initialized On-Chain Support Circles & Circuits
 
@@ -68,10 +64,10 @@
 | `proveAndJoinCircle` | Verifies ZK proofs and admits members anonymously | **Oncology & Chronic Illness Peer Support** (`ID: ...00000003`) |
 | `isNullifierSpent` | Prevents double-joining while preserving anonymity | **Neurodivergent & Adult ADHD Circle** (`ID: ...00000004`) |
 
-### 🔍 How to Verify Contract on Midnight Preprod Explorer
+### 🔍 How to Verify Contract on Midnight Preview Explorer
 
-1. Open the **[Midnight Preprod Explorer](https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02)**.
-2. Search for the contract address: `0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02`.
+1. Open the **[Midnight Preview Explorer](https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897)**.
+2. Search for the contract address: `06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897`.
 3. View deployed circles, public state, and ZK nullifier registry.
 
 ---
