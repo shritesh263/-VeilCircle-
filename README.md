@@ -139,6 +139,30 @@ All 4 circuits from [`contract/src/veilcircle.compact`](contract/src/veilcircle.
 
 ---
 
+## 📸 Application & On-Chain Visual Gallery
+
+| 1. Midnight Preview Smart Contract Deployment | 2. 1AM / Lace Wallet Connection |
+| :---: | :---: |
+| ![Contract Deployment](docs/screenshots/contract_deployment.png) | ![1AM Wallet Connection](docs/screenshots/1am_connection_request.png) |
+
+| 3. Connected Dashboard & Balance Sync | 4. Explore Health Support Circles |
+| :---: | :---: |
+| ![Connected Dashboard](docs/screenshots/1am_connected_dashboard.png) | ![Explore Circles](docs/screenshots/v3.png) |
+
+| 5. Client-Side ZK Private Credentials Vault | 6. Create Support Circle Modal |
+| :---: | :---: |
+| ![ZK Credentials Vault](docs/screenshots/v4.png) | ![Create Circle Modal](docs/screenshots/v6.png) |
+
+| 7. Client-Side ZK Prover & Witness Blinding | 8. Proof Settlement & Admission Token |
+| :---: | :---: |
+| ![ZK Prover Studio](docs/screenshots/v8.png) | ![Proof Settlement](docs/screenshots/v9.png) |
+
+| 9. Anonymous Peer Sanctuary (Live Encrypted Room) | 10. On-Chain Ledger & Nullifier Registry |
+| :---: | :---: |
+| ![Live Peer Sanctuary](docs/screenshots/v1.1.png) | ![On-Chain Ledger](docs/screenshots/v10.png) |
+
+---
+
 ## ⚡ Quick Start & Local Execution
 
 ### 1. Install Dependencies
