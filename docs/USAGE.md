@@ -7,8 +7,8 @@
 ## ⚡ Quick Links
 
 - 🚀 **Live Production DApp**: [https://veil-circle.vercel.app](https://veil-circle.vercel.app)
-- 📜 **Deployed Preview Contract**: [`363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f`](https://preview.midnightexplorer.com/contract/363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f)
-- 🔍 **Midnight Preview Explorer**: [preview.midnightexplorer.com/contract/363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f](https://preview.midnightexplorer.com/contract/363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f)
+- 📜 **Deployed Preview Contract**: [`363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f`](https://preview.midnightexplorer.com/contracts/0x363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f)
+- 🔍 **Midnight Preview Explorer**: [preview.midnightexplorer.com/contracts/0x363d...](https://preview.midnightexplorer.com/contracts/0x363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f)
 - 🎥 **Product Demo Video**: [https://drive.google.com/file/d/1E6O49P6oLA8SkSfrYYYnxGW4Ms178uU9/view?usp=sharing](https://drive.google.com/file/d/1E6O49P6oLA8SkSfrYYYnxGW4Ms178uU9/view?usp=sharing)
 - 🐦 **Twitter / X Community**: [https://x.com/veilcircle?s=11](https://x.com/veilcircle?s=11) (`@veilcircle`)
 

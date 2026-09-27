@@ -16,8 +16,8 @@
 | Resource | Link / Handle | Status |
 | :--- | :--- | :--- |
 | 🚀 **Live Production DApp** | [https://veil-circle.vercel.app/](https://veil-circle.vercel.app/) | 🟢 **Live & Active** |
-| 🛡️ **Midnight Preview Contract** | [`363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f`](https://preview.midnightexplorer.com/contract/363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f) | 🟢 **Confirmed On-Chain** |
-| 🔍 **Explorer Verification** | [preview.midnightexplorer.com/contract/...](https://preview.midnightexplorer.com/contract/363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f) | 🟢 **Verified** |
+| 🛡️ **Midnight Preview Contract** | [`363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f`](https://preview.midnightexplorer.com/contracts/0x363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f) | 🟢 **Confirmed On-Chain** |
+| 🔍 **Explorer Verification** | [preview.midnightexplorer.com/contracts/0x363d...](https://preview.midnightexplorer.com/contracts/0x363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f) | 🟢 **Verified** |
 | 🐦 **Twitter / X Account** | [https://x.com/veilcircle?s=11](https://x.com/veilcircle?s=11) (`@veilcircle`) | 🟢 **Active** |
 | 🎥 **Product Demo Video** | [Watch Demo Video](https://drive.google.com/file/d/1E6O49P6oLA8SkSfrYYYnxGW4Ms178uU9/view?usp=sharing) | 🟢 **Available** |
 
@@ -34,7 +34,7 @@
 > 👤 Deployer Address : mn_addr_preview1g46qj0948v5skhp9naufza0wmggredhp8reu30efhq69yevd86wsx4yg6e
 > 🌐 Target Network   : Midnight Preview Testnet
 > 📜 Language & Engine: Compact 0.30.0 (Pragma >= 0.22.0) • @midnight-ntwrk/compact-runtime@0.15.0
-> 🔍 Explorer Link    : https://preview.midnightexplorer.com/contract/363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f
+> 🔍 Explorer Link    : https://preview.midnightexplorer.com/contracts/0x363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f
 > 📁 Local Record     : contract/deployments/preview.json • .midnight-contract.json
 > ```
 
