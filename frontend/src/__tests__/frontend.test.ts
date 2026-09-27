@@ -78,11 +78,11 @@ describe("Frontend Crypto & Midnight Integration", () => {
           getDustBalance: async () => ({ balance: 25000000n, cap: 100000000n }),
           getUnshieldedBalances: async () => ({ "00": 50000000n }),
           getConfiguration: async () => ({
-            indexerUri: "https://indexer.preprod.midnight.network",
-            indexerWsUri: "wss://indexer.preprod.midnight.network",
-            substrateNodeUri: "https://rpc.preprod.midnight.network",
+            indexerUri: "https://indexer.preview.midnight.network",
+            indexerWsUri: "wss://indexer.preview.midnight.network",
+            substrateNodeUri: "https://rpc.preview.midnight.network",
             proverServerUri: "http://localhost:6300",
-            networkId: "preprod"
+            networkId: "preview"
           })
         })
       },
@@ -98,11 +98,11 @@ describe("Frontend Crypto & Midnight Integration", () => {
           getDustBalance: async () => ({ balance: 12000000n, cap: 50000000n }),
           getUnshieldedBalances: async () => ({ "00": 10000000n }),
           getConfiguration: async () => ({
-            indexerUri: "https://indexer.preprod.midnight.network",
-            indexerWsUri: "wss://indexer.preprod.midnight.network",
-            substrateNodeUri: "https://rpc.preprod.midnight.network",
+            indexerUri: "https://indexer.preview.midnight.network",
+            indexerWsUri: "wss://indexer.preview.midnight.network",
+            substrateNodeUri: "https://rpc.preview.midnight.network",
             proverServerUri: "http://localhost:6300",
-            networkId: "preprod"
+            networkId: "preview"
           })
         })
       }

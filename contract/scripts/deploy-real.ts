@@ -5,8 +5,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { VeilCircleContract } from '../src/contract';
-import { bytesToHex, randomBytes, sha256 } from '../src/crypto';
+import { VeilCircleContract } from '../src/contract.js';
+import { bytesToHex, randomBytes, sha256 } from '../src/crypto.js';
 
 async function main() {
   console.log('=================================================');

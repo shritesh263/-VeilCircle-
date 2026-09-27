@@ -10,7 +10,6 @@ import { LedgerExplorer } from "./components/LedgerExplorer";
 import { LaceWalletModal } from "./components/LaceWalletModal";
 import { CreateCircleModal } from "./components/CreateCircleModal";
 import { DashboardStatsOverview } from "./components/DashboardStatsOverview";
-import { ContractInfoPanel } from "./components/ContractInfoPanel";
 import { Circle, PrivateCredential, LaceWalletState, ZkProofDetails } from "./types";
 import { DEFAULT_CIRCLES, INITIAL_CREDENTIALS } from "./services/mockData";
 import { midnightService } from "./services/midnight";
@@ -180,12 +179,6 @@ export const App: React.FC = () => {
               onNavigateTab={(tab) => setActiveTab(tab)}
             />
 
-            {/* Contract Information Panel */}
-            <ContractInfoPanel
-              contractConfig={contractConfig}
-              onOpenExplorerTab={() => setActiveTab('ledger')}
-            />
-
             {/* Circles Directory */}
             <CircleExplorer
               circles={circles}
@@ -278,9 +271,9 @@ export const App: React.FC = () => {
           <div className="flex items-center gap-6 text-xs text-on-surface-variant font-mono">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              <span className="text-primary font-bold">Midnight Preprod Active</span>
+              <span className="text-primary font-bold">Midnight Preview Active</span>
             </span>
-            <span>Compact 0.19 • CIP-30</span>
+            <span>Compact 0.30.0 • CIP-30</span>
           </div>
         </div>
       </footer>

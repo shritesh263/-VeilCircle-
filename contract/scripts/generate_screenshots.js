@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const screenshotsDir = path.join(__dirname, "..", "..", "screenshots");
+const screenshotsDir = path.join(__dirname, "..", "..", "docs", "screenshots");
 if (!fs.existsSync(screenshotsDir)) {
   fs.mkdirSync(screenshotsDir, { recursive: true });
 }
@@ -96,4 +96,4 @@ const deploySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="5
 
 fs.writeFileSync(path.join(screenshotsDir, "contract_deployment.svg"), deploySvg);
 
-console.log("✔ Created screenshots in screenshots/ directory (compact_compile.svg & contract_deployment.svg)");
+console.log("✔ Created screenshots in docs/screenshots/ directory (compact_compile.svg & contract_deployment.svg)");

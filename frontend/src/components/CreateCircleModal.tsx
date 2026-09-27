@@ -7,14 +7,14 @@ interface CreateCircleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreateCircle: (circle: Circle) => void;
-  network: "preview" | "preprod";
+  network?: string;
 }
 
 export const CreateCircleModal: React.FC<CreateCircleModalProps> = ({
   isOpen,
   onClose,
   onCreateCircle,
-  network
+  network = "preview"
 }) => {
   if (!isOpen) return null;
 
@@ -56,7 +56,7 @@ export const CreateCircleModal: React.FC<CreateCircleModalProps> = ({
         cohort: "Cohort 01",
         scheduleBadge: "Daily Check-in",
         isActive: true,
-        contractAddress: NETWORKS[network].contractAddress,
+        contractAddress: NETWORKS.preview.contractAddress,
         badgeColor: "primary",
         iconName: "nature_people",
         tags: tagList.length > 0 ? tagList : ["caregiver", "referrals"]
@@ -87,7 +87,7 @@ export const CreateCircleModal: React.FC<CreateCircleModalProps> = ({
           </div>
           <div>
             <h3 className="text-lg sm:text-xl font-bold text-on-surface">Create New Support Circle</h3>
-            <p className="text-xs text-on-surface-variant font-mono">Midnight {network.toUpperCase()} • Compact Contract</p>
+            <p className="text-xs text-on-surface-variant font-mono">Midnight Preview Testnet • Compact Contract</p>
           </div>
         </div>
 

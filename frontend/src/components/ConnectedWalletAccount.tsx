@@ -30,7 +30,7 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const currentNetwork = NETWORKS[walletState.network] || NETWORKS.preprod;
+  const currentNetwork = NETWORKS[walletState.network] || NETWORKS.preview;
 
   const handleCopy = (text: string, label: string) => {
     if (text) {
@@ -620,7 +620,7 @@ export const ConnectedWalletAccount: React.FC<ConnectedWalletAccountProps> = ({
         <div className="p-3.5 rounded-2xl bg-surface-container-low flex items-center justify-between border border-surface-container">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px] text-on-surface-variant">terminal</span>
-            <span className="text-xs font-mono text-on-surface-variant">Proof #9102 • Compact v0.19</span>
+            <span className="text-xs font-mono text-on-surface-variant">Proof #9102 • Compact v0.30.0</span>
           </div>
           <span className="text-xs text-on-surface-variant font-medium">4 min ago</span>
         </div>

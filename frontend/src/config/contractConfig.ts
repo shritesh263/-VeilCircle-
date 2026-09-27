@@ -1,3 +1,5 @@
+import deployedContract from './deployed-contract.json';
+
 export interface ContractConfig {
   address: string;
   network: string;
@@ -38,7 +40,7 @@ export function isValidContractAddress(address: string | undefined | null): bool
 
 /**
  * Loads the VeilCircle contract configuration from environment variables or defaults.
- * Uses a valid Midnight Preprod contract address.
+ * Defaults to the live deployed contract on Midnight Preview testnet.
  */
 export function getContractConfig(): ContractConfig {
   const meta = typeof import.meta !== 'undefined' ? (import.meta as any) : undefined;
@@ -46,15 +48,11 @@ export function getContractConfig(): ContractConfig {
     meta?.env?.VITE_CONTRACT_ADDRESS ||
     meta?.env?.NEXT_PUBLIC_CONTRACT_ADDRESS ||
     (typeof process !== 'undefined' ? (process.env as any)?.VITE_CONTRACT_ADDRESS || (process.env as any)?.NEXT_PUBLIC_CONTRACT_ADDRESS : undefined) ||
-    '0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02';
+    deployedContract.contractAddress;
 
-  const network =
-    meta?.env?.VITE_NETWORK ||
-    meta?.env?.NEXT_PUBLIC_NETWORK ||
-    (typeof process !== 'undefined' ? (process.env as any)?.VITE_NETWORK || (process.env as any)?.NEXT_PUBLIC_NETWORK : undefined) ||
-    'preprod';
+  const network = 'preview';
 
-  const cleanAddress = envAddress.trim();
+  const cleanAddress = (envAddress || '363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f').trim();
   const isValid = isValidContractAddress(cleanAddress);
 
   let errorMessage: string | null = null;
@@ -64,11 +62,12 @@ export function getContractConfig(): ContractConfig {
     errorMessage = `VeilCircle contract address "${cleanAddress}" is invalid. Expected a valid Midnight contract address (64-character hex hash or Bech32 address).`;
   }
 
-  const explorerUrl = `https://explorer.${network}.midnight.network/contract/${cleanAddress}`;
+  const hexAddress = cleanAddress.startsWith('0x') ? cleanAddress : `0x${cleanAddress}`;
+  const explorerUrl = `https://preview.midnightexplorer.com/contracts/${hexAddress}`;
 
   return {
     address: cleanAddress,
-    network,
+    network: 'preview',
     isValid,
     errorMessage,
     policyId: '0x5665696c436972636c655f507269766163795f53616e6374756172795f563230',

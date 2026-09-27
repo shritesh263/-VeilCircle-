@@ -1,9 +1,10 @@
 // ============================================================================
-// MIDNIGHT NETWORK CONFIGURATION (PREPROD & PREVIEW SUPPORT)
-// Target Networks: Midnight Preprod (Stable Testnet) & Midnight Preview (Feature Testnet)
+// MIDNIGHT NETWORK CONFIGURATION (MIDNIGHT PREVIEW TESTNET)
+// Target Network: Midnight Preview Testnet (Feature Testnet)
+// Live Deployed Contract: 363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f
 // ============================================================================
 
-export type NetworkId = 'preprod' | 'preview';
+export type NetworkId = 'preview';
 
 /**
  * Interface describing Midnight network RPC endpoints, indexers, explorer links, and contract addresses.
@@ -25,47 +26,32 @@ export interface NetworkConfig {
 }
 
 export const MIDNIGHT_NETWORKS: Record<NetworkId, NetworkConfig> = {
-  preprod: {
-    networkId: 'preprod',
-    networkName: 'Midnight Preprod Testnet',
-    rpcEndpoint: 'wss://rpc.preprod.midnight.network',
-    indexerApiUrl: 'https://midnight-preprod.blockfrost.io/api/v0',
-    indexerWsUrl: 'wss://midnight-preprod.blockfrost.io/api/v0/ws',
-    blockfrostRpcUrl: 'https://rpc.midnight-preprod.blockfrost.io',
-    proofServerUrl: 'http://localhost:6300',
-    faucetUrl: 'https://faucet.preprod.midnight.network',
-    explorerUrl: 'https://explorer.preprod.midnight.network',
-    explorerContractUrl: 'https://explorer.preprod.midnight.network/contract/0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02',
-    contractAddress: '0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02',
-    deploymentTxHash: '0x6193246854e40f7e97835eb6a146a4b73569586aab90fb165e1a2b2214b97ff5',
-    deployedBlock: 489201,
-  },
   preview: {
     networkId: 'preview',
     networkName: 'Midnight Preview Testnet',
     rpcEndpoint: 'wss://rpc.preview.midnight.network',
-    indexerApiUrl: 'https://midnight-preview.blockfrost.io/api/v0',
-    indexerWsUrl: 'wss://midnight-preview.blockfrost.io/api/v0/ws',
-    blockfrostRpcUrl: 'https://rpc.midnight-preview.blockfrost.io',
+    indexerApiUrl: 'https://indexer.preview.midnight.network/api/v4/graphql',
+    indexerWsUrl: 'wss://indexer.preview.midnight.network/api/v4/graphql/ws',
+    blockfrostRpcUrl: 'https://rpc.preview.midnight.network',
     proofServerUrl: 'http://localhost:6300',
     faucetUrl: 'https://faucet.preview.midnight.network',
-    explorerUrl: 'https://explorer.preview.midnight.network',
-    explorerContractUrl: 'https://explorer.preview.midnight.network/contract/0x124a84fafb57db4096cc7664b5dc5047a46485b04052b9f348413e5365874d86',
-    contractAddress: '0x124a84fafb57db4096cc7664b5dc5047a46485b04052b9f348413e5365874d86',
-    deploymentTxHash: '0x4b502b60915736f504cacd76abb9442f64a24b0e030da89c313978931dedc407',
-    deployedBlock: 124589,
+    explorerUrl: 'https://preview.midnightexplorer.com',
+    explorerContractUrl: 'https://preview.midnightexplorer.com/contracts/0x363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f',
+    contractAddress: '363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f',
+    deploymentTxHash: 'f84a691f39fd0795b7efeb1b92c402f978c0c8861c5e0ee2ea604e2023509c62',
+    deployedBlock: 1,
   },
 };
 
-export const MIDNIGHT_PREPROD_CONFIG = MIDNIGHT_NETWORKS.preprod;
 export const MIDNIGHT_PREVIEW_CONFIG = MIDNIGHT_NETWORKS.preview;
 
 /**
- * Returns network configuration by network ID (defaults to Preprod).
+ * Returns network configuration by network ID (strictly Preview).
  */
-export function getNetworkConfig(networkId: NetworkId = 'preprod'): NetworkConfig {
-  return MIDNIGHT_NETWORKS[networkId] || MIDNIGHT_NETWORKS.preprod;
+export function getNetworkConfig(_networkId: string = 'preview'): NetworkConfig {
+  return MIDNIGHT_NETWORKS.preview;
 }
 
-// Default target network
-export const activeNetworkConfig = MIDNIGHT_NETWORKS.preprod;
+// Default target network: Midnight Preview
+export const activeNetworkConfig = MIDNIGHT_NETWORKS.preview;
+

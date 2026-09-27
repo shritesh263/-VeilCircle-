@@ -6,7 +6,7 @@
 // ============================================================================
 
 import { WalletAdapter, WalletAccount, MidnightTransaction, ProvingProvider, WalletType } from './types';
-import { MIDNIGHT_PREPROD_CONFIG } from '../config/network';
+import { MIDNIGHT_PREVIEW_CONFIG } from '../config/network';
 
 export class LaceWalletAdapter implements WalletAdapter {
   public readonly id: WalletType = 'lace';
@@ -76,26 +76,20 @@ export class LaceWalletAdapter implements WalletAdapter {
     let api: any = null;
     let lastErr: any = null;
 
-    // Stage 1: Try provider.connect() (Midnight DApp Connector standard)
+    // Stage 1: Try provider.connect('preview') (Midnight DApp Connector standard)
     if (typeof provider.connect === 'function') {
       try {
-        api = await provider.connect();
+        api = await provider.connect('preview');
       } catch (err1: any) {
         lastErr = err1;
+        const msg = (err1?.reason || err1?.message || String(err1)).toLowerCase();
+        if (msg.includes('reject') || msg.includes('cancel') || msg.includes('denied') || msg.includes('declined')) {
+          throw new Error("Lace Wallet connection request was cancelled in the wallet popup.");
+        }
         try {
-          api = await provider.connect('preprod');
+          api = await provider.connect();
         } catch (err2: any) {
           lastErr = err2;
-          try {
-            api = await provider.connect('undeployed');
-          } catch (err3: any) {
-            lastErr = err3;
-            try {
-              api = await provider.connect('preview');
-            } catch (err4: any) {
-              lastErr = err4;
-            }
-          }
         }
       }
     }
@@ -207,7 +201,7 @@ export class LaceWalletAdapter implements WalletAdapter {
     const account: WalletAccount = {
       address,
       coinPublicKey: pubKey,
-      networkId: MIDNIGHT_PREPROD_CONFIG.networkId,
+      networkId: MIDNIGHT_PREVIEW_CONFIG.networkId,
     };
 
     this.connectedAccount = account;

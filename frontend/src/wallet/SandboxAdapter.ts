@@ -5,7 +5,7 @@
 // ============================================================================
 
 import { WalletAdapter, WalletAccount, MidnightTransaction, ProvingProvider, WalletType } from './types';
-import { MIDNIGHT_PREPROD_CONFIG } from '../config/network';
+import { MIDNIGHT_PREVIEW_CONFIG } from '../config/network';
 
 export class SandboxWalletAdapter implements WalletAdapter {
   public readonly id: WalletType = 'sandbox';
@@ -21,15 +21,15 @@ export class SandboxWalletAdapter implements WalletAdapter {
   }
 
   public async connect(): Promise<{ account: WalletAccount; api: any }> {
-    // Generate deterministic yet session-unique Preprod address
+    // Generate deterministic yet session-unique Preview address
     const randomHex = Array.from(crypto.getRandomValues(new Uint8Array(20)))
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
 
     const account: WalletAccount = {
-      address: `mn_test1qq${randomHex.slice(0, 32)}`,
+      address: `mn_addr_preview1qq${randomHex.slice(0, 32)}`,
       coinPublicKey: `0x89a1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1`,
-      networkId: MIDNIGHT_PREPROD_CONFIG.networkId,
+      networkId: MIDNIGHT_PREVIEW_CONFIG.networkId,
       balance: {
         night: 5000000000n,
         dust: 25000000000n,

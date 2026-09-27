@@ -1,53 +1,85 @@
 # VeilCircle 🛡️ — Anonymous & Zero-Knowledge Peer Health Support Networks
 
-
-
 [![Live Deployment](https://img.shields.io/badge/Live_DApp-veil--circle.vercel.app-00F2FE?style=for-the-badge&logo=vercel&logoColor=white)](https://veil-circle.vercel.app/)
 [![Midnight Blockchain](https://img.shields.io/badge/Blockchain-Midnight_Preview-006948?style=for-the-badge&logo=blockchain)](https://midnight.network)
-[![Smart Contract](https://img.shields.io/badge/Language-Compact_0.19-7928CA?style=for-the-badge)](https://docs.midnight.network)
+[![Smart Contract](https://img.shields.io/badge/Language-Compact_0.30.0-7928CA?style=for-the-badge)](https://docs.midnight.network)
 [![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-Passing-22C55E?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/shritesh263/-VeilCircle-/actions)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
-[![X Profile](https://img.shields.io/badge/X-@VeilCircleZK-1DA1F2?style=for-the-badge&logo=x&logoColor=white)](https://x.com/VeilCircleZK)
+[![X Profile](https://img.shields.io/badge/X-@veilcircle-1DA1F2?style=for-the-badge&logo=x&logoColor=white)](https://x.com/veilcircle?s=11)
 
 > **"Prove you belong in a support group — without ever revealing who you are."**
 
 ---
 
-## 🌐 Live Deployments & Network Details
+## 🔗 Official Submission Links
+
+| Resource | Link / Handle | Status |
+| :--- | :--- | :--- |
+| 🚀 **Live Production DApp** | [https://veil-circle.vercel.app/](https://veil-circle.vercel.app/) | 🟢 **Live & Active** |
+| 🛡️ **Midnight Preview Contract** | [`363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f`](https://preview.midnightexplorer.com/contract/363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f) | 🟢 **Confirmed On-Chain** |
+| 🔍 **Explorer Verification** | [preview.midnightexplorer.com/contract/...](https://preview.midnightexplorer.com/contract/363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f) | 🟢 **Verified** |
+| 🐦 **Twitter / X Account** | [https://x.com/veilcircle?s=11](https://x.com/veilcircle?s=11) (`@veilcircle`) | 🟢 **Active** |
+| 🎥 **Product Demo Video** | [Watch Demo Video](https://drive.google.com/file/d/1E6O49P6oLA8SkSfrYYYnxGW4Ms178uU9/view?usp=sharing) | 🟢 **Available** |
+
+---
+
+## 🌐 Live On-Chain Deployment Details (Midnight Preview)
 
 > [!IMPORTANT]
-> # 🚀 PROVEN ON-CHAIN: Live Midnight Preview Smart Contract Deployment
+> ### 🚀 PROVEN ON-CHAIN: Live Midnight Preview Smart Contract
 > 
+> ```text
+> 📍 Contract Address : 363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f
+> 🆔 Deployment TxHash: f84a691f39fd0795b7efeb1b92c402f978c0c8861c5e0ee2ea604e2023509c62
+> 👤 Deployer Address : mn_addr_preview1g46qj0948v5skhp9naufza0wmggredhp8reu30efhq69yevd86wsx4yg6e
+> 🌐 Target Network   : Midnight Preview Testnet
+> 📜 Language & Engine: Compact 0.30.0 (Pragma >= 0.22.0) • @midnight-ntwrk/compact-runtime@0.15.0
+> 🔍 Explorer Link    : https://preview.midnightexplorer.com/contract/363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f
+> 📁 Local Record     : contract/deployments/preview.json • .midnight-contract.json
 > ```
-> 📍 Contract Address:  06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897
-> 🌐 Network:            Midnight Preview Testnet
-> 📜 Language & Engine:  Compact 0.19 • BLS12-381 ZK-SNARK Prover
-> 🔍 Explorer URL:       https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897
-> 📁 Deployment Record:  contract/deployments/preview.json
-> ```
 
-| Resource | URL / Address | Description | Status |
-| :--- | :--- | :--- | :--- |
-| 🚀 **Live Web DApp** | [https://veil-circle.vercel.app/](https://veil-circle.vercel.app/) | Official Production Vercel Deployment | 🟢 **Live & Active** |
-| 🛡️ **Midnight Preview Contract** | [`06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897`](https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897) | Primary Preview Testnet Smart Contract | 🟢 **Deployed & Active** |
-| 🔍 **Preview Explorer** | [explorer.preview.midnight.network/contract/...](https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897) | On-Chain Contract & Ledger Explorer | 🟢 **Online** |
-| ⚡ **Midnight Indexer API** | `https://indexer.preview.midnight.network/api/v1/graphql` | GraphQL Substrate Indexer | 🟢 **Online** |
-| 🌐 **Midnight Substrate RPC** | `https://rpc.preview.midnight.network` | Remote Node RPC Endpoint | 🟢 **Online** |
+---
 
-### 📋 Initialized On-Chain Support Circles & Circuits
+## 📁 Repository Structure
 
-| Circuit Name | Purpose & Cryptographic Function | Initialized Circles |
-| :--- | :--- | :--- |
-| `createCircle` | Instantiates new confidential peer support networks | **Veterans Trauma & PTSD Recovery** (`ID: ...00000001`) |
-| `registerCredentialCommitment` | Registers clinical provider commitment hashes | **Substance & Addiction Recovery Anonymous** (`ID: ...00000002`) |
-| `proveAndJoinCircle` | Verifies ZK proofs and admits members anonymously | **Oncology & Chronic Illness Peer Support** (`ID: ...00000003`) |
-| `isNullifierSpent` | Prevents double-joining while preserving anonymity | **Neurodivergent & Adult ADHD Circle** (`ID: ...00000004`) |
+This repository follows the official Midnight Moonshot standard file structure:
 
-### 🔍 How to Verify Contract on Midnight Preview Explorer
-
-1. Open the **[Midnight Preview Explorer](https://explorer.preview.midnight.network/contract/06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897)**.
-2. Search for the contract address: `06b145f9d6302d56a438f464a55370f02f60eecd51a1f29f12860e4c35c70897`.
-3. View deployed circles, public state, and ZK nullifier registry.
+```text
+VeilCircle/
+├── contract/                       # Compact smart contract & ZK circuits
+│   ├── src/
+│   │   ├── veilcircle.compact      # Main Compact smart contract & ZK circuits
+│   │   ├── contract.ts             # Contract runtime bindings & schema
+│   │   ├── crypto.ts               # Cryptographic primitives & witness generators
+│   │   └── managed/                # Auto-generated Compact compiler artifacts (keys, zkir)
+│   ├── scripts/                    # Deployment & wallet helper scripts
+│   ├── test/                       # Contract & circuit Vitest test suite
+│   ├── deployments/                # On-chain deployment records (Preview & Preprod)
+│   ├── compile.sh                  # Compact compilation build script
+│   ├── package.json                # Contract dependencies & scripts
+│   └── tsconfig.json               # Contract TypeScript configuration
+├── frontend/                       # Web3 DApp user interface (React + Vite + Tailwind)
+│   ├── public/                     # Static assets & public ZK prover keys
+│   ├── src/
+│   │   ├── components/             # UI components (PrivacySanctuary, WalletConnect, etc.)
+│   │   ├── hooks/                  # Custom hooks (useMidnight, etc.)
+│   │   ├── services/               # Midnight client & crypto services
+│   │   ├── wallet/                 # 1AM & Lace wallet connector adapters
+│   │   ├── utils/                  # Contract interaction & formatting helpers
+│   │   ├── App.tsx                 # Main application entry component
+│   │   └── main.tsx                # React DOM bootstrap
+│   ├── package.json                # Frontend dependencies & scripts
+│   └── vite.config.ts              # Vite bundler configuration
+├── docs/                           # Documentation & visual assets
+│   ├── screenshots/                # Application UI, wallet sync & deployment proofs
+│   └── USAGE.md                    # Detailed user walkthrough & guide
+├── .github/
+│   └── workflows/
+│       └── ci.yml                  # GitHub Actions CI/CD test & build pipeline
+├── README.md                       # Comprehensive overview, architecture, & links
+├── PROPOSAL.md                     # Complete Level 3 project proposal
+└── package.json                    # Workspace scripts & orchestration
+```
 
 ---
 
@@ -63,9 +95,9 @@ Peer support groups for sensitive medical diagnoses, mental health journeys, tra
 
 Users prove mathematical possession of a legitimate clinical attestation or recovery referral without disclosing their identity, diagnosis, medical provider, or cross-circle activity.
 
-```
+```text
 +-------------------------------------------------------------------------------------------------+
-|                                 CLIENT ENCLAVE (BROWSER ONLY)                                  |
+|                                 CLIENT ENCLAVE (BROWSER ONLY)                                   |
 |                                                                                                 |
 |   [ Private Patient Credential ]               [ Private Witness Parameters ]                   |
 |   • Diagnosis / Condition Attestation          • secretKey: sk (256-bit entropy)                |
@@ -84,7 +116,7 @@ Users prove mathematical possession of a legitimate clinical attestation or reco
 +-------------------------------------------------------------------------------------------------+
 |                             MIDNIGHT BLOCKCHAIN & SMART CONTRACT                                |
 |                                                                                                 |
-|   [ Compact 0.19 Smart Contract ]                                                               |
+|   [ Compact 0.30.0 Smart Contract: veilcircle.compact ]                                         |
 |   1. Verifies proof π against registered eligibility commitments: C ∈ ValidCommitments          |
 |   2. Enforces non-membership in spent registry: Nullifier ∉ SpentNullifiers                     |
 |   3. Atomically registers Nullifier to prevent double-joining                                   |
@@ -94,375 +126,52 @@ Users prove mathematical possession of a legitimate clinical attestation or reco
 
 ---
 
-## 🔬 Cryptographic Privacy Model & Mathematical Formalism
+## 🔬 Deployed Compact Zero-Knowledge Circuits
 
-VeilCircle enforces strict mathematical boundary separation between client-side private witness inputs and on-chain public ledger state.
+All 4 circuits from [`contract/src/veilcircle.compact`](contract/src/veilcircle.compact) are deployed and active on Midnight Preview:
 
-### 1. Mathematical Breakdown
-
-$$\text{Credential Commitment: } C = \mathcal{H}_{\text{Poseidon}}(sk \parallel \text{attribute} \parallel r)$$
-
-$$\text{Circle-Isolated Nullifier: } \mathcal{N}_{\text{circle}} = \mathcal{H}_{\text{Poseidon}}(sk \parallel \text{circleId})$$
-
-$$\text{ZK-SNARK Statement: } \pi \vdash \left( \exists (sk, \text{attribute}, r) \text{ s.t. } \mathcal{H}(sk \parallel \text{attribute} \parallel r) = C \land \mathcal{H}(sk \parallel \text{circleId}) = \mathcal{N}_{\text{circle}} \right)$$
-
-### 2. Privacy Matrix (Witness vs. Public Ledger)
-
-| Parameter | Location | Visibility | Cryptographic Function |
-| :--- | :--- | :--- | :--- |
-| **Member Full Name & Identity** | None (Never collected) | ❌ **Zero Visibility** | Absolute user anonymity |
-| **Medical Diagnosis / Trauma Record** | Client Private Memory | ❌ **Zero Visibility** | Shielded in private witness |
-| **Secret Blinding Entropy (\(r\))** | Client Private Memory | ❌ **Zero Visibility** | Prevents rainbow table attacks |
-| **User Secret Key (\(sk\))** | Client Private Memory | ❌ **Zero Visibility** | Never leaves browser enclave |
-| **Eligibility Commitment (\(C\))** | On-Chain Contract State | 🌐 **Public Hash** | Cryptographic anchor of authorized clinic |
-| **Target Circle ID** | On-Chain Contract State | 🌐 **Public ID** | Specifies the requested peer group |
-| **Circle Nullifier (\(\mathcal{N}\))** | On-Chain Contract State | 🌐 **Public Hash** | Single-use double-join prevention |
-| **ZK-SNARK Proof (\(\pi\))** | Transaction Calldata | 🌐 **Public Proof** | Mathematical verification of membership |
-
-### 3. What an Observer CAN vs. CANNOT Learn
-
-```
-CAN OBSERVE ON-CHAIN:
-✔ That an authorized member joined Circle #42
-✔ That a unique nullifier hash (0x9a8f...) was consumed
-✔ That the circle member count increased by 1
-✔ The block height and timestamp of the transaction
-
-CAN NEVER OBSERVE:
-❌ Who joined (no wallet address, IP, or name linked)
-❌ Which specific clinic issued their credential
-❌ What medical condition or diagnosis the member has
-❌ Whether the same member is also in Circle #15 or Circle #88 (cross-circle unlinkability)
-```
+| Circuit Name | Purpose & Cryptographic Function | Access |
+| :--- | :--- | :--- |
+| `createCircle` | Instantiates new confidential peer support networks with eligibility rules | Public |
+| `registerCredentialCommitment` | Registers clinical provider commitment hashes ($C = \text{Hash}(sk, \text{attr}, r)$) | Public / Provider |
+| `proveAndJoinCircle` | Proves possession of authorized witness parameters, checks nullifiers, and joins circle | ZK-SNARK Proof |
+| `isNullifierSpent` | Queries whether a member's nullifier has already joined the group | Public View Query |
 
 ---
 
-## 🪢 Multi-Wallet Architecture & Instant Extension Handshake
+## ⚡ Quick Start & Local Execution
 
-VeilCircle features native, multi-wallet connectivity compliant with the official **Midnight DApp Connector API** and CIP-30 standards:
-
-```
-                                    +--------------------+
-                                    |   VeilCircle UI    |
-                                    +---------+----------+
-                                              |
-                                              v
-                                   [ Wallet Registry ]
-                                   /         |        \
-                                  /          |         \
-                                 v           v          v
-                       +-------------+ +------------+ +-----------------+
-                       | 1AM Adapter | |Lace Adapter| | Sandbox Adapter |
-                       +------+------+ +-----+------+ +--------+--------+
-                              |              |                 |
-                              v              v                 v
-                      window.midnight["1am"] window.midnight.lace Instant Testnet
-                      (Native Extension)    (Native Extension)  (Zero Extension)
-```
-
-### Supported Wallets
-
-1. **⚡ 1AM Midnight Wallet (`xyz.1am.wallet`)**:
-   - Purpose-built Midnight browser extension with native ZK proof server.
-   - Real extension popup handshake within seconds.
-   - Multi-stage fallback: `provider.connect()` &rarr; `provider.connect('preprod')` &rarr; `provider.connect('undeployed')` &rarr; `provider.enable()`.
-
-2. **🪢 Midnight Lace Wallet (`io.lace.midnight`)**:
-   - Official lightweight web extension by IOHK for Midnight and Cardano.
-   - Real shielded address derivation (`mn_...`), transparent keys, and DUST balances.
-
-3. **🧪 Instant Testnet Sandbox (`sandbox.midnight.testnet`)**:
-   - Instant, pre-funded testnet environment with **850.00 tDUST** and **25.00 NIGHT**.
-   - Allows instant hands-on evaluation of all ZK proofs, circles, and settlement without requiring extension setup.
-
-### 🚀 Interactive Multi-Wallet Handshake & Native 1AM Integration
-When connecting via 1AM or Lace, VeilCircle immediately triggers the browser extension authorization popup:
-- **Connection Approval**: 1-click extension authorization handshake on Midnight Preprod testnet.
-- **Shielded Holdings & Enclave**: View live shielded and unshielded balances (`NIGHT` & `tDUST`).
-- **Cryptographic Session**: Real-time CIP-30 / DApp connector protocol with `ZK_MEMBERSHIP_JOIN` scope.
-
-<p align="center">
-  <img src="screenshots/1am_connection_request.png" alt="1AM Connection Request Handshake Popup" width="49%" style="border-radius: 10px; border: 1px solid #334155;" />
-  <img src="screenshots/1am_wallet_balance.png" alt="1AM Extension Holdings & Balances" width="49%" style="border-radius: 10px; border: 1px solid #334155;" />
-</p>
-
-<p align="center">
-  <img src="screenshots/1am_connected_dashboard.png" alt="VeilCircle Active Dashboard with 1AM Connected" width="98%" style="border-radius: 10px; border: 1px solid #334155;" />
-</p>
-
----
-
-## 📸 Application Screenshots & Visual Walkthrough
-
-### 1. 🔍 Safe Circle Discovery & Explorer
-Browse and filter verified support groups with real-time ZK eligibility checks without exposing medical history.
-
-<p align="center">
-  <img src="screenshot/v1.png" alt="Circle Explorer Directory" width="49%" />
-  <img src="screenshot/v1.1.png" alt="Circle Explorer Search & Eligibility" width="49%" />
-</p>
-
----
-
-### 2. 🔐 ZK Credential Vault
-Store and manage cryptographic clinical intake attestations, recovery referral codes, and clinician signatures strictly in local browser memory.
-
-<p align="center">
-  <img src="screenshot/v2.png" alt="ZK Credential Vault Overview" width="49%" />
-  <img src="screenshot/v3.png" alt="Add Clinical Attestation" width="49%" />
-</p>
-
----
-
-### 3. 🧪 Client-Side ZK Prover Studio
-Step-by-step witness parameter blinding, Poseidon hashing, Compact circuit constraint satisfaction, and cryptographic proof synthesis.
-
-<p align="center">
-  <img src="screenshot/v4.png" alt="ZK Prover Studio - Witness Setup" width="49%" />
-  <img src="screenshot/v5.png" alt="ZK Prover Studio - Proof Synthesis" width="49%" />
-</p>
-
----
-
-### 4. ⚡ Proof Settlement & Zero-Gas Relay
-Automated relayer sponsorship through Midnight Compact smart contracts with instant on-chain verification and nullifier registration.
-
-<p align="center">
-  <img src="screenshot/v6.png" alt="Proof Relayer & Settlement" width="49%" />
-  <img src="screenshot/v7.png" alt="Proof Verification & Confirmation" width="49%" />
-</p>
-
----
-
-### 5. 🌿 Anonymous Peer Sanctuary Room & Real-Time Ephemeral Chat
-Join ephemeral peer support rooms with end-to-end client blinded pseudonyms, zero tracking, and ZK-verified attendee badges.
-
-<p align="center">
-  <img src="screenshots/sanctuary_live_chat.png" alt="Live Anonymous Peer Sanctuary with ZK-Verified Participants" width="98%" style="border-radius: 10px; border: 1px solid #334155;" />
-</p>
-
-<p align="center">
-  <img src="screenshot/v8.png" alt="Peer Sanctuary Room Overview" width="49%" />
-  <img src="screenshot/v9.png" alt="Sanctuary Ephemeral Chat" width="49%" />
-</p>
-
----
-
-### 6. 🛡️ Hardware Enclave & Connected Account
-Manage shielded DUST and transparent NIGHT balances, export encrypted enclave backups, and configure auto-lock security controls.
-
-<p align="center">
-  <img src="screenshot/v10.png" alt="Connected Account Dashboard" width="49%" />
-  <img src="screenshot/v11.png" alt="Security & Enclave Backup" width="49%" />
-</p>
-
----
-
-### 7. 📜 On-Chain Ledger Explorer
-Real-time audit log of public circle states, consumed nullifier hashes, and verifiable block heights on Midnight testnet.
-
-<p align="center">
-  <img src="screenshot/v12.png" alt="Ledger Explorer State" width="49%" />
-  <img src="screenshot/v13.png" alt="Ledger Explorer Nullifier Registry" width="49%" />
-</p>
-
----
-
-## 🖥️ Core DApp Features & User Interface
-
-VeilCircle is built with a serene, modern, accessible interface tailored for emotional safety and clinical rigor:
-
-### 1. 🔍 Safe Circle Explorer
-- Real-time search by condition, clinical criteria, recovery stage, or tag.
-- Instant ZK eligibility indicator showing how many local credentials qualify.
-- 1-click join with zero personal data transmission.
-
-### 2. 🔐 ZK Credential Vault
-- Secure client-side storage for clinical attestations, recovery referrals, and doctor signatures.
-- Add new custom credentials with 256-bit blinding entropy.
-- Select credentials for immediate proof generation in the ZK Studio.
-
-### 3. 🧪 ZK Prover Studio
-- Interactive 4-step proof generation engine:
-  1. *Credential Selection*
-  2. *Witness Parameter Blinding*
-  3. *Circuit Constraint Evaluation*
-  4. *Proof Synthesis (\(\pi\))*
-- Real-time **Cryptographic Inspector** displaying raw JSON proof payloads, public inputs, nullifiers, and verification timestamps.
-
-### 4. ⚡ Proof Settlement & Zero-Gas Relay
-- Automated gasless relayer simulation via Midnight Compact smart contracts.
-- Instant on-chain confirmation and admission token dispatch.
-
-### 5. 🌿 Anonymous Peer Sanctuary Room
-- Ephemeral encrypted peer chat with room participants.
-- Anonymous ZK avatar pseudonyms derived deterministically from circle-specific nullifiers (e.g., `Breeze-91a2`, `Aurora-4e7b`).
-- Zero persistent database logging.
-
-### 6. 🛡️ Hardware Enclave & Connected Account
-- Real-time shielded DUST and transparent NIGHT balances.
-- Connected wallet service endpoints (Substrate Node, Indexer, Prover Server).
-- Encrypted enclave backup export & emergency local nullifier purge.
-
-### 7. 📜 On-Chain Ledger Explorer
-- Transparent real-time audit log of public circle registries, spent nullifiers, and contract events.
-
----
-
-## 📦 Project Architecture & Codebase Directory
-
-```
-VeilCircle/
-├── contract/                                 # Midnight Compact 0.19 Smart Contract & Circuits
-│   ├── src/
-│   │   ├── veilcircle.compact                # Core Compact smart contract source
-│   │   ├── contract.ts                       # TypeScript contract state manager & simulator
-│   │   ├── crypto.ts                         # WebCrypto & Poseidon cryptographic hashing engine
-│   │   ├── witnesses.ts                      # Private witness computation & bindings
-│   │   ├── types.ts                          # Contract TypeScript type definitions
-│   │   └── managed/veilcircle/               # Compiled circuit artifacts & TS bindings
-│   ├── test/
-│   │   └── veilcircle.test.ts                # Comprehensive contract unit & property tests
-│   ├── scripts/
-│   │   ├── compile.js                        # Compact compiler pipeline
-│   │   └── deploy.ts                         # Midnight Preprod & Preview deployer
-│   ├── tsconfig.json
-│   └── package.json
-│
-├── frontend/                                 # Modern React / TypeScript / Vite DApp
-│   ├── src/
-│   │   ├── components/                       # UI Components
-│   │   │   ├── Navbar.tsx                    # Header with wallet badge & network switcher
-│   │   │   ├── CircleExplorer.tsx            # Circle directory with search & eligibility
-│   │   │   ├── CircleCard.tsx                # Circle card with membership states
-│   │   │   ├── CredentialVault.tsx           # Private attestation storage
-│   │   │   ├── ZkProofStudio.tsx             # Interactive client-side ZK-SNARK prover
-│   │   │   ├── ProofSettlement.tsx           # Proof relayer & settlement screen
-│   │   │   ├── PeerSanctuary.tsx             # Anonymous ephemeral chat sanctuary
-│   │   │   ├── ConnectedWalletAccount.tsx    # Shielded account dashboard & backup
-│   │   │   ├── LedgerExplorer.tsx            # On-chain state & spent nullifiers
-│   │   │   ├── LaceWalletModal.tsx           # Real wallet connect & Next Steps Window
-│   │   │   └── CreateCircleModal.tsx         # New circle creation dialog
-│   │   ├── wallet/                           # CipherTrial-Standard Wallet Architecture
-│   │   │   ├── types.ts                      # WalletAdapter, WalletAccount, ProvingProvider
-│   │   │   ├── registry.ts                   # Singleton WalletRegistry
-│   │   │   ├── OneAmAdapter.ts               # Pure real 1AM wallet adapter
-│   │   │   ├── LaceAdapter.ts                # Pure real Lace wallet adapter
-│   │   │   └── SandboxAdapter.ts             # Instant testnet sandbox adapter
-│   │   ├── providers/                        # React Context Providers
-│   │   │   └── WalletContext.tsx             # Wallet state context & hooks
-│   │   ├── services/                         # Services
-│   │   │   ├── midnight.ts                   # Midnight service & DApp connector wrapper
-│   │   │   └── crypto.ts                     # Client-side cryptographic helper functions
-│   │   ├── config/                           # Network & chain configurations
-│   │   │   └── network.ts                    # Preprod & Preview endpoints
-│   │   ├── types/                            # Frontend TypeScript definitions
-│   │   ├── __tests__/                        # Frontend unit tests (Vitest)
-│   │   ├── App.tsx                           # Main application orchestrator
-│   │   └── main.tsx                          # Entry point
-│   ├── index.html
-│   ├── vite.config.ts
-│   ├── tsconfig.json
-│   └── package.json
-│
-├── screenshot/                               # UI Screenshots & Visual Walkthrough (15 Assets)
-│   ├── v1.png                                # Safe Circle Explorer & Directory
-│   ├── v1.1.png                              # Search & Eligibility Validation
-│   ├── v2.png                                # ZK Credential Vault Overview
-│   ├── v3.png                                # Add Clinical Attestation
-│   ├── v4.png                                # ZK Prover Studio - Witness Parameter Blinding
-│   ├── v5.png                                # Circuit Constraint Satisfaction & Proof Synthesis
-│   ├── v6.png                                # Proof Relayer & Zero-Gas Settlement
-│   ├── v7.png                                # Proof Verification Confirmation
-│   ├── v8.png                                # Anonymous Peer Sanctuary Overview
-│   ├── v9.png                                # Ephemeral Peer Sanctuary Chat
-│   ├── v10.png                               # Hardware Enclave & Account Dashboard
-│   ├── v11.png                               # Enclave Backup Export & Security Controls
-│   ├── v12.png                               # On-Chain Ledger Explorer State
-│   ├── v13.png                               # Public Nullifier Registry Audit
-│   └── v14.png                               # Multi-Wallet Connection & Next Steps Window
-│
-├── vercel.json                               # Vercel SPA routing & deployment configuration
-├── .github/workflows/ci.yml                  # GitHub Actions continuous integration pipeline
-├── WALLET_INTEGRATION_README.md              # Wallet connector quick-start guide
-└── README.md                                 # Complete project documentation
-```
-
----
-
-## 🛠️ Developer Quick Start & Local Setup
-
-### Prerequisites
-- **Node.js**: `>= 20.0.0`
-- **npm**: `>= 10.0.0`
-- **Browser Extension**: [1AM Wallet](https://1am.xyz) or [Midnight Lace](https://www.lace.io) *(optional, Sandbox available)*
-
-### 1. Clone Repository
+### 1. Install Dependencies
 ```bash
-git clone https://github.com/shritesh263/-VeilCircle-.git
-cd -VeilCircle-
-```
-
-### 2. Install Dependencies
-```bash
-# Install root, contract, and frontend dependencies
 npm run install:all
 ```
 
-### 3. Compile Compact Smart Contracts
+### 2. Run Contract Tests
 ```bash
-npm run compile:contract
+npm run test:contract
 ```
 
-### 4. Run Automated Test Suite
+### 3. Run Frontend Tests
 ```bash
-# Runs both contract (vitest) and frontend (vitest) test suites
-npm test
+npm run test:frontend
 ```
 
-### 5. Start Local Development Server
+### 4. Start Development Server
 ```bash
 npm run dev
 ```
-Navigate to **`http://localhost:3000`** (or `http://localhost:5173`) in your browser.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## 🧪 Comprehensive Test Suite & Verification
+## 👛 Supported Midnight Wallets
 
-The repository enforces complete unit, property, and invariant tests across contracts and frontend:
-
-```bash
-npm test
-```
-
-### Test Coverage Highlights:
-- ✔ **Valid Membership Proof**: Client witness matching authorized commitment successfully joins circle.
-- ✔ **Forged Witness Rejection**: Attacker with forged secret or unapproved attribute is strictly rejected by the circuit.
-- ✔ **Double-Spend Prevention**: Reusing a credential in the same circle fails due to nullifier collision.
-- ✔ **Cross-Circle Isolation**: Same credential in different circles derives independent, uncorrelated nullifiers.
-- ✔ **Client Witness Blinding**: WebCrypto SHA-256 / Poseidon circuit synthesis & witness salt blinding validation.
+VeilCircle supports both official Midnight browser extension adapters:
+1. **1AM Wallet**: Full support for Preview testnet, unshielded balance sync, and transaction signing.
+2. **Lace Wallet**: Native support for Midnight Preview DApp Connector API.
 
 ---
 
-## 🔒 Security & Cryptographic Audit Checklist
+## 📜 License
 
-| Security Control | Implementation |
-| :--- | :--- |
-| **Zero Private Data Leakage** | Witness parameters never leave the browser runtime; calldata contains only proof \(\pi\) and \(\mathcal{N}\). |
-| **Sybil Attack Resistance** | Deterministic nullifier derivation prevents an eligible user from claiming multiple seats per circle. |
-| **XSS Prevention** | Wallet icon and name rendering sanitized via native image elements and text nodes (no `dangerouslySetInnerHTML`). |
-| **Local Storage Sanitation** | `localStorage` only retains public wallet RDNS identifier; zero private keys or seed phrases stored. |
-| **Cross-Origin Security** | Compliant with browser CORS and CSP standards for isolated extension popups. |
-
----
-
-## 📜 License & Community
-
-- **License**: [Apache License 2.0](LICENSE)
-- **Live DApp**: [https://veil-circle.vercel.app/](https://veil-circle.vercel.app/)
-- **Repository**: [https://github.com/shritesh263/-VeilCircle-](https://github.com/shritesh263/-VeilCircle-)
-- **Socials**: Follow updates on X at [@VeilCircleZK](https://x.com/VeilCircleZK)
-- **Midnight Network**: [midnight.network](https://midnight.network) | [docs.midnight.network](https://docs.midnight.network)
-
-
+Licensed under the [Apache License, Version 2.0](LICENSE).

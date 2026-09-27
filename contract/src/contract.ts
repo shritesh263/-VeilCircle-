@@ -6,7 +6,7 @@ import {
   hexToBytes,
   sha256,
   ZkProof
-} from "./crypto";
+} from "./crypto.js";
 
 export interface CircleInfo {
   id: string; // Hex 32 bytes

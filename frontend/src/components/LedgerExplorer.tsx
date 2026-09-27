@@ -48,7 +48,7 @@ export const LedgerExplorer: React.FC<LedgerExplorerProps> = ({
       <div className="flex flex-col gap-2">
         <div className="inline-flex items-center gap-2 py-1 px-3.5 rounded-full bg-primary-fixed/60 text-on-primary-fixed-variant text-[11px] font-bold uppercase tracking-wider font-mono w-fit">
           <span className="w-2 h-2 rounded-full bg-primary animate-ping"></span>
-          <span>Midnight Public Ledger • Compact v0.19</span>
+          <span>Midnight Public Ledger • Compact v0.30.0</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold text-on-surface">
           Public Contract State &amp; Nullifier Registry
@@ -106,7 +106,7 @@ export const LedgerExplorer: React.FC<LedgerExplorerProps> = ({
               Midnight {network.toUpperCase()}
             </div>
             <div className="text-xs text-on-surface-variant font-mono mt-1">
-              Chain ID: {network === "preprod" ? "489201" : "124589"} • RPC Active
+              Chain ID: 124589 • RPC Active
             </div>
           </div>
           <div className="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-xs text-on-surface-variant">

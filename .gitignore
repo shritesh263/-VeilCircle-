@@ -25,3 +25,10 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Midnight Wallet State & Local DB
+.veilcircle-wallet-state/
+*.hex
+midnight-level-db/
+veilcircle-private-state/
+

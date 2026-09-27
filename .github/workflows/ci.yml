@@ -33,11 +33,9 @@ jobs:
         working-directory: ./contract
         run: npm test
 
-      - name: Verify Preprod & Preview Deployment Artifacts
+      - name: Verify Midnight Preview Deployment Artifacts
         working-directory: ./contract
-        run: |
-          npm run deploy:preview
-          npm run deploy:preprod
+        run: npm run verify:deployment
 
   frontend-build-and-test:
     name: Frontend Build, ZK Proof & Lace Integration Tests

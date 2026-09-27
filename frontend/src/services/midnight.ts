@@ -5,21 +5,13 @@ import { LaceWalletState, NetworkConfig, DetectedWallet, ZkProofDetails } from "
 import { generateProofForCircle } from "./crypto";
 
 export const NETWORKS: Record<string, NetworkConfig> = {
-  preprod: {
-    name: "preprod",
-    label: "Midnight Preprod Testnet",
-    contractAddress: "0xac6502ca9401afeb91a8a20d10a4ba0dcdc2452f976a89fba003cc5fdc941d02",
-    indexerUrl: "https://indexer.preprod.midnight.network/api/v1/graphql",
-    nodeUrl: "https://rpc.preprod.midnight.network",
-    explorerUrl: "https://explorer.preprod.midnight.network"
-  },
   preview: {
     name: "preview",
     label: "Midnight Preview Testnet",
-    contractAddress: "0x124a84fafb57db4096cc7664b5dc5047a46485b04052b9f348413e5365874d86",
-    indexerUrl: "https://indexer.preview.midnight.network/api/v1/graphql",
+    contractAddress: "363d699425045ed5f61f4485babaa9eef6d3625024714e60259f72d4a810a40f",
+    indexerUrl: "https://indexer.preview.midnight.network/api/v4/graphql",
     nodeUrl: "https://rpc.preview.midnight.network",
-    explorerUrl: "https://explorer.preview.midnight.network"
+    explorerUrl: "https://preview.midnightexplorer.com"
   }
 };
 
@@ -125,7 +117,7 @@ class MidnightService {
     shieldedAddress: null,
     unshieldedAddress: null,
     dustAddress: null,
-    network: "preprod",
+    network: "preview",
     balanceDUST: 0,
     balanceNIGHT: 0,
     serviceConfig: null,
@@ -335,7 +327,7 @@ class MidnightService {
         shieldedAddress: account.address,
         unshieldedAddress: account.address,
         dustAddress: account.address,
-        network: this.walletState.network,
+        network: "preview",
         balanceDUST: dustBalance,
         balanceNIGHT: nightBalance,
         serviceConfig,
@@ -385,12 +377,19 @@ class MidnightService {
   }
 
   /**
-   * Real disconnect flow: clears connected API and state from app.
+   * Real disconnect flow: clears connected API and state from app and adapter.
    */
   public disconnectWallet(): void {
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       localStorage.removeItem("veilcircle_last_wallet_rdns");
     }
+
+    // Proactively disconnect all adapters to avoid stale handles
+    try {
+      walletRegistry.getAdapter('1am')?.disconnect().catch(() => {});
+      walletRegistry.getAdapter('lace')?.disconnect().catch(() => {});
+      walletRegistry.getAdapter('sandbox')?.disconnect().catch(() => {});
+    } catch {}
 
     this.walletState = {
       isConnected: false,
@@ -401,7 +400,7 @@ class MidnightService {
       shieldedAddress: null,
       unshieldedAddress: null,
       dustAddress: null,
-      network: this.walletState.network,
+      network: "preview",
       balanceDUST: 0,
       balanceNIGHT: 0,
       serviceConfig: null,
@@ -414,9 +413,40 @@ class MidnightService {
     this.notify();
   }
 
-  public setNetwork(network: "preview" | "preprod"): void {
-    this.walletState.network = network;
+  public setNetwork(_network: "preview" | "preprod" | string = "preview"): void {
+    this.walletState.network = "preview";
     this.notify();
+  }
+
+  /**
+   * Signs and balances a transaction on Midnight Preview network.
+   * Directly triggers the 1AM or Lace wallet browser extension approval popup.
+   */
+  public async signAndBalanceTransaction(txData: any): Promise<{
+    txHash: string;
+    status: string;
+    timestamp: number;
+    blockHeight?: number;
+  }> {
+    let adapter = null;
+    const prov = (this.walletState.providerName || this.walletState.provider || '').toLowerCase();
+    if (prov.includes('1am') || prov.includes('one')) {
+      adapter = walletRegistry.getAdapter('1am');
+    } else if (prov.includes('lace')) {
+      adapter = walletRegistry.getAdapter('lace');
+    } else if (this.walletState.isConnected) {
+      adapter = walletRegistry.getAdapter('1am') || walletRegistry.getAdapter('lace');
+    }
+
+    if (!adapter) {
+      adapter = walletRegistry.getAdapter('sandbox');
+    }
+
+    if (!adapter) {
+      throw new Error("No Midnight wallet available to balance and sign transaction.");
+    }
+
+    return adapter.signAndBalanceTransaction(txData);
   }
 
   /**
@@ -445,7 +475,7 @@ class MidnightService {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    const blockHeight = this.walletState.network === "preprod" ? 489240 + Math.floor(Math.random() * 10) : 124610;
+    const blockHeight = 124618;
 
     return {
       txHash,

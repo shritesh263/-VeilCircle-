@@ -73,7 +73,7 @@ export interface PeerMessage {
 }
 
 export interface NetworkConfig {
-  name: "preview" | "preprod";
+  name: "preview";
   label: string;
   contractAddress: string;
   indexerUrl: string;
@@ -103,7 +103,7 @@ export interface LaceWalletState {
   shieldedAddress: string | null;
   unshieldedAddress: string | null;
   dustAddress: string | null;
-  network: "preview" | "preprod";
+  network: "preview";
   balanceDUST: number;
   balanceNIGHT: number;
   serviceConfig: Configuration | null;

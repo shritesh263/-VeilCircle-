@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { VeilCircleContract, PrivateWitness } from "../src/contract";
+import { VeilCircleContract, PrivateWitness } from "../src/contract.js";
 import {
   computeCommitment,
   computeNullifier,
   randomBytes,
   bytesToHex,
   hexToBytes
-} from "../src/crypto";
+} from "../src/crypto.js";
 
 describe("VeilCircle Smart Contract & ZK Circuits", () => {
   let contract: VeilCircleContract;
